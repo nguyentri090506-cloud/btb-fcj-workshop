@@ -7,35 +7,37 @@ pre: "<b> 5.4.1. </b> "
 
 # 5.4.1. AWS Budgets
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã tạo budget; cần đối chiếu số tiền, ngưỡng và email nhận.
 
-Theo dõi chi phí trước khi chạy Fargate, ALB, WAF và truyền dữ liệu. Budget gửi cảnh báo chứ không tự tắt tài nguyên.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Giám sát chi phí và cảnh báo ngân sách của hạ tầng BTB production.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Vào **Billing and Cost Management → Budgets → Create budget** bằng tài khoản/role có quyền xem billing.
-2. Chọn **Cost budget**, chu kỳ hàng tháng và nhập ngân sách do nhóm duyệt (không tự bịa mức USD).
-3. Thêm ngưỡng cảnh báo theo % chi phí thực tế do nhóm chọn, email người nhận và kiểm tra nhận thông báo.
-4. Gắn tag `Project=BTB` cho tài nguyên; kích hoạt cost allocation tags tại Billing nếu cần.
-5. Ghi lại tên Budget, tiền tệ, chu kỳ, ngưỡng và bằng chứng hoạt động; che email cá nhân trong ảnh.
+1. Vào Billing and Cost Management → Budgets → kiểm tra budget BTB đã tồn tại trước khi chỉnh sửa.
+2. Ghi loại budget (cost), chu kỳ (monthly), tiền tệ, phạm vi và ngưỡng cảnh báo actual/forecast.
+3. Kiểm tra email nhận thông báo, trạng thái xác nhận và khả năng nhận thư của nhóm.
+4. So sánh chi phí thực tế/dự báo với ECS, ALB, CloudFront, WAF và logging.
+5. Nếu lab chưa có budget riêng, tạo cost budget với ngưỡng *ví dụ* được nhóm chốt; không bịa ngân sách production.
+6. Chụp thông tin cần thiết; không khẳng định hệ thống đã gửi cảnh báo nếu chưa có email thực tế.
 
+## Kết quả mong đợi và ghi nhận thực tế
 
+**Mong đợi:** Có budget; ngưỡng và nơi nhận đúng dữ liệu ghi lại; chỉ đánh dấu email thành công khi có minh chứng.
 
-## Checklist xác nhận
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
 
-- [ ] Budget hiện trong Console và có trạng thái phù hợp.
-- [ ] So sánh actual/forecast với giả định ở Pricing Calculator.
+## Lưu ý vận hành và rủi ro
 
-## Lưu ý và bảo mật
+Budgets không tự khóa chi tiêu; tài nguyên production vẫn có thể tính phí.
 
-AWS Budgets không bảo đảm giới hạn chi phí cứng; cần kiểm tra chi phí thường xuyên.
+## Ảnh minh chứng cần chụp
 
-## Ảnh chụp thực tế cần bổ sung
+Cấu hình budget, người nhận email và đồ thị chi phí.
 
-**Chụp sau khi triển khai:** Trang chi tiết Budget, ngưỡng/alert, Cost Explorer hoặc màn hình chi phí.
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.4.1-01.png` (chụp Console thật; không tự tạo ảnh giả).
 
-Tên file ví dụ `static/images/5-workshop/5.4.1-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.4.1-01.png" alt="AWS Budgets" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
+## Tài liệu tham khảo
 
-**Tài liệu AWS:** <https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>
+<https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>

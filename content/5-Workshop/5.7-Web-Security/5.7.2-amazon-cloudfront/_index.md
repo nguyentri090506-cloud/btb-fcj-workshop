@@ -7,42 +7,37 @@ pre: "<b> 5.7.2. </b> "
 
 # 5.7.2. Amazon CloudFront
 
-## Purpose and BTB use case
+> **Source status, as reported by the BTB team (18 November 2026):** Frontend distribution active.
 
-Distribute the React frontend globally over HTTPS while keeping S3 private via OAC. The backend API remains a **separate ALB hostname** in this lab unless the team explicitly implements CloudFront API origin routing.
+## Objective and actual role
 
-> **Deployment status:** Planned instructional steps; do not mark checks complete without real AWS Console evidence.
+Delivers the React SPA from S3 with HTTPS, caching and WAF integration.
 
-## Step-by-step lab
+## Lab: inspect, document and verify the existing production setup
 
-1. Open **CloudFront → Create distribution**, choose the S3 REST origin (not S3 website endpoint).
-2. Create/select **Origin Access Control (OAC)** and apply the generated bucket policy granting this distribution access to S3 objects.
-3. Set viewer protocol policy to **Redirect HTTP to HTTPS** and default root object to `index.html`.
-4. For React SPA routes, configure appropriate custom error handling / routing fallback (`403` or `404` to `/index.html` as appropriate) while avoiding accidental masking of API errors.
-5. Add custom web domain (alternate domain name) and ACM viewer certificate from **us-east-1**.
-6. Publish and test the CloudFront distribution; invalidate changed assets or apply versioned caching policies when updating frontend.
-7. Verify direct public S3 access is denied and frontend requests do not expose API secrets.
+1. Open CloudFront → Distributions; select the frontend production distribution and record its ID, alternate domain, status and default behavior.
+2. Verify origin points to the intended S3 bucket and inspect Origin Access Control/bucket access if used.
+3. Check viewer certificate, HTTPS redirect, cache policy and response behavior for static assets.
+4. Review SPA routing fallback: confirm React deep links work, using app-compatible CloudFront custom errors/functions/rewrite (do not blindly turn all 403s into index.html if it hides real failures).
+5. Check the attached frontend AWS WAF web ACL separately from the backend ALB WAF.
+6. Verify content through the real domain, then inspect cache invalidation from GitHub Actions after deployment.
 
-## CLI or query example
+## Expected outcome / result recording
 
-```bash
-# Invalidate after a new frontend upload if needed:
-aws cloudfront create-invalidation --distribution-id <DISTRIBUTION_ID> --paths '/*'
-```
+**Expected:** Frontend domain returns page/assets over HTTPS and nested routes work on refresh.
 
-## Validation checklist
+**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
 
-- [ ] HTTPS web loads on distribution and custom domain.
-- [ ] Deep link reload works; S3 public read denied.
+## Risks and operational notes
 
-## Pitfalls / security
+CloudFront is global; do not place it as a resource *inside* a single VPC subnet in the final diagram.
 
-SPA fallback should be configured for frontend assets and routes, not to silently turn every backend API 404 into HTML.
+## Screenshot evidence to capture
 
-## Required personal screenshots
+Distribution status, origin, TLS and browser network requests.
 
-**Capture after execution:** Distribution origins, OAC policy, cache behavior, certificate and working React page.
+**Suggested path:** `static/images/5-workshop/5.7.2-01.png` (capture from real Console; do not create a fake screenshot).
 
-Use filenames like `static/images/5-workshop/5.7.2-01.png`. Do not upload credentials or customer data. Add a screenshot using `{{</* workshop-image src="images/5-workshop/5.7.2-01.png" alt="Amazon CloudFront evidence" caption="Recorded from actual deployment" */>}}` **only after the file exists**.
+## Official reference
 
-**AWS documentation:** <https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>
+<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html>

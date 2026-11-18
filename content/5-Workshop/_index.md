@@ -5,28 +5,32 @@ chapter: false
 pre: "<b> 5. </b> "
 ---
 
-# Deploying Bite to Business on AWS
+# Deploying Bite to Business on AWS — End-to-End Workshop
 
-This **hands-on infrastructure workshop** documents deployment of the **Bite to Business (BTB)** food-commerce web application. BTB is the direct seller to individuals/households and business customers; it is **not** a multi-vendor marketplace. The backend is a modular-monolith Spring Boot application; the frontend is React/TypeScript.
+This workshop explains the **reported production architecture** and how to inspect, verify, troubleshoot and document it. It covers the whole team's AWS and non-AWS components rather than only one member's services. It follows the **Bite to Business (BTB)** application, a direct-sale food-commerce website serving both business customers and individuals/households. BTB is **not** a multi-vendor marketplace.
 
-**Scope:** Amazon VPC, AWS IAM, AWS Budgets, Amazon ECR, Amazon S3, AWS Secrets Manager, Application Load Balancer, Amazon ECS with AWS Fargate, AWS Certificate Manager, Amazon CloudFront, Amazon Route 53, AWS WAF, and Amazon CloudWatch Logs.
+The frontend is React/TypeScript, delivered through **S3 → CloudFront**, with **Route 53, ACM and WAF**. The Java Spring Boot modular-monolith backend runs on **ECS with Fargate** behind an **Application Load Balancer**. Backend Docker images are stored in **ECR**. Operations use **IAM, Secrets Manager, CloudWatch Logs/Metrics/Alarms, SNS, Budgets, CloudWatch RUM and Cognito Identity Pools**. The team reports **Bedrock** model configuration. **Supabase, Cloudinary, Vietmap, SePay and Gmail SMTP** are external providers. **GitHub Actions** deploys frontend and backend from `feat/prod`.
 
-**Teammate-owned services are excluded from this lab:** Amazon Bedrock, SQS, SES, CodePipeline/CodeBuild, CloudWatch Metrics/Alarms, CloudTrail, NAT Gateway and VPC endpoints. They may appear in the **shared architecture** for context only.
+**Evidence boundary:** production status is based on the team's inventory dated **18 November 2026**, not on direct read access to AWS. Bedrock production API invocation and RUM telemetry are explicitly **pending verification**; backend WAF limiting rules are set to **Count**, not Block. Historical project documents mention Gemini and disagree about Supabase Auth/JWT; inspect the active backend before claiming a definitive implementation.
 
-**Documentation status / Trạng thái tài liệu:** Draft instructions. Resource names, values, test results, demo links and screenshots must be replaced with real evidence before submission. / Bản nháp hướng dẫn. Cần thay tên tài nguyên, thông số, kết quả kiểm thử, link demo và ảnh chụp bằng minh chứng thực tế trước khi nộp.
+**Scope exclusions:** SQS, SES, CodePipeline/CodeBuild, CloudTrail, NAT Gateway and VPC endpoints were mentioned in earlier plans, but were **not confirmed in the team's latest production inventory**. This workshop does not invent them as deployed resources.
 
-## Contents
+## Navigation
 
-1. [Overview](5.1-overview/)
-2. [Prerequisites](5.2-prerequisites/)
-3. [Architecture & Data Flow](5.3-architecture/)
-4. [Foundation Setup](5.4-foundation/)
-5. [Container & Storage](5.5-containers-storage/)
-6. [Backend Deployment](5.6-backend/)
-7. [Web Delivery & Security](5.7-web-security/)
-8. [Logging & Troubleshooting](5.8-logging/)
-9. [Testing, Validation & Demo](5.9-testing/)
-10. [Cost Estimation & Optimization](5.10-cost/)
-11. [Cleanup](5.11-cleanup/)
+- [5.1. Overview](5.1-overview/)
+- [5.2. Prerequisites](5.2-prerequisites/)
+- [5.3. Architecture & Data Flow](5.3-architecture/)
+- [5.4. Network & Foundation](5.4-foundation/)
+- [5.5. Container & Storage](5.5-containers-storage/)
+- [5.6. Backend & AI Deployment](5.6-backend-ai/)
+- [5.7. Web Delivery & Security](5.7-web-security/)
+- [5.8. Monitoring & Alerts](5.8-monitoring-alerts/)
+- [5.9. External Integrations](5.9-external-integrations/)
+- [5.10. CI/CD Deployment](5.10-ci-cd/)
+- [5.11. Testing & Live Demo](5.11-testing/)
+- [5.12. Cost Estimation](5.12-cost/)
+- [5.13. Cleanup & Troubleshooting](5.13-cleanup/)
 
-**Before submission:** personally reconstruct and verify the AWS diagram using official AWS icons; perform the deployment; record actual Console screenshots, command outputs, measured results, cost calculator estimates, and live-demo evidence. The sample site and this draft are not proof that AWS resources exist.
+## Evidence instructions
+
+Each service page provides actual reported status, hands-on inspection steps, expected results, an empty actual-result field and screenshot suggestions. **Replace placeholders with your own dated AWS Console screenshots**, CI/CD run logs, redacted tests and domain details. Do not present an example as a test that already passed. Keep secrets and Customer records private.

@@ -7,42 +7,45 @@ pre: "<b> 5.7.3. </b> "
 
 # 5.7.3. Amazon Route 53
 
-## Purpose and BTB use case
+> **Source status, as reported by the BTB team (18 November 2026):** DNS configured.
 
-Resolve the frontend hostname to CloudFront and API hostname to the ALB. Route 53 is DNS, not a proxy; HTTPS termination occurs at CloudFront and ALB.
+## Objective and actual role
 
-> **Deployment status:** Planned instructional steps; do not mark checks complete without real AWS Console evidence.
+DNS records direct frontend and API hostnames to CloudFront and ALB.
 
-## Step-by-step lab
+## Lab: inspect, document and verify the existing production setup
 
-1. Verify which registrar/DNS service is authoritative for the group domain before changing DNS.
-2. Open **Route 53 → Hosted zones** and create/use a **public hosted zone** for the authorized domain.
-3. Update the registrar name servers only if moving authoritative DNS to Route 53 and after verifying existing records.
-4. Add **A/AAAA Alias** records (as applicable) for web hostname → CloudFront distribution and API hostname → ALB.
-5. Wait for DNS propagation; query public resolvers and test HTTPS for both subdomains.
-6. Record hosted zone cost and DNS query volume assumptions in the cost worksheet.
+1. Open Route 53 → Hosted zones; identify the actual public zone for the BTB domain.
+2. Record the frontend hostname's alias/CNAME target and ensure it points to CloudFront distribution domain as configured.
+3. Record the API hostname's alias target and ensure it points to the Application Load Balancer DNS name.
+4. Check TTL values if used and verify DNS validation records required by ACM are present and maintained.
+5. Use `Resolve-DnsName` or `nslookup` on both live names; compare actual answers to intended service targets.
+6. Test HTTPS responses to both hostnames and document the resulting frontend/API behavior.
 
-## CLI or query example
+## Expected outcome / result recording
+
+**Expected:** DNS for FE and API resolves correctly and HTTPS serves the intended service.
+
+**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+
+## Risks and operational notes
+
+DNS names, hosted zones and domains are placeholders until the team supplies real verified values.
+
+## Screenshot evidence to capture
+
+Hosted zone records, resolved targets and browser HTTPS checks.
+
+**Suggested path:** `static/images/5-workshop/5.7.3-01.png` (capture from real Console; do not create a fake screenshot).
+
+## Optional read-only command
 
 ```powershell
-nslookup <FRONTEND_DOMAIN>
-nslookup <API_DOMAIN>
-# Then verify both names in a browser using https://
+# Windows PowerShell — replace with actual public names
+Resolve-DnsName <FRONTEND_DOMAIN>
+Resolve-DnsName <API_DOMAIN>
 ```
 
-## Validation checklist
+## Official reference
 
-- [ ] DNS resolves frontend and API records to intended AWS targets.
-- [ ] Certificate hostnames match, and HTTPS serves the correct apps.
-
-## Pitfalls / security
-
-Do not create conflicting public DNS records or claim a domain is owned without confirmation.
-
-## Required personal screenshots
-
-**Capture after execution:** Hosted zone, Alias records and `nslookup` results.
-
-Use filenames like `static/images/5-workshop/5.7.3-01.png`. Do not upload credentials or customer data. Add a screenshot using `{{</* workshop-image src="images/5-workshop/5.7.3-01.png" alt="Amazon Route 53 evidence" caption="Recorded from actual deployment" */>}}` **only after the file exists**.
-
-**AWS documentation:** <https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-cloudfront-distribution.html>
+<https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html>

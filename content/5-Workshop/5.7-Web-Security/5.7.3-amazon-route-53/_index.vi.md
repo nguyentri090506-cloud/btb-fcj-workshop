@@ -7,42 +7,45 @@ pre: "<b> 5.7.3. </b> "
 
 # 5.7.3. Amazon Route 53
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** DNS đã cấu hình.
 
-Phân giải domain frontend tới CloudFront và API tới ALB. Route 53 chỉ làm DNS, không proxy request; HTTPS termination tại CloudFront và ALB.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Bản ghi DNS trỏ hostname frontend về CloudFront và API về ALB.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Xác nhận nhà đăng ký/nhà DNS đang quản lý domain có thẩm quyền trước khi thay DNS.
-2. Vào **Route 53 → Hosted zones**, tạo/dùng **public hosted zone** cho domain được phép.
-3. Chỉ đổi nameserver ở registrar khi thực sự chuyển authoritative DNS sang Route 53 và đã kiểm tra record cũ.
-4. Tạo record **A/AAAA Alias** (nếu cần) cho web → CloudFront, API → ALB.
-5. Chờ DNS propagation, truy vấn resolver công khai và test HTTPS cả hai subdomain.
-6. Ghi phí hosted zone và giả định DNS query vào bảng Cost.
+1. Mở Route 53 → Hosted zones, xác định public hosted zone của domain BTB.
+2. Ghi alias/CNAME của tên miền FE và xác nhận trỏ đúng CloudFront distribution.
+3. Ghi alias của API hostname và xác nhận trỏ đến ALB DNS name.
+4. Kiểm tra TTL và bản ghi DNS validation cho ACM đang được duy trì.
+5. Dùng `Resolve-DnsName` hoặc `nslookup` với cả hai domain thực tế rồi đối chiếu đích DNS.
+6. Gọi HTTPS từng domain, ghi frontend/API hoạt động theo cấu hình.
 
-## Ví dụ CLI hoặc câu truy vấn
+## Kết quả mong đợi và ghi nhận thực tế
+
+**Mong đợi:** DNS FE/API resolve đúng và HTTPS trả đúng dịch vụ.
+
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+
+## Lưu ý vận hành và rủi ro
+
+Tên miền/hosted zone phải do nhóm kiểm chứng; không lấy tên ví dụ ghi như production.
+
+## Ảnh minh chứng cần chụp
+
+Record DNS, đích resolve và ảnh HTTPS trình duyệt.
+
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.7.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
+
+## Lệnh kiểm tra tham khảo (read-only)
 
 ```powershell
-nslookup <FRONTEND_DOMAIN>
-nslookup <API_DOMAIN>
-# Sau đó mở cả hai hostname qua https://
+# Windows PowerShell — replace with actual public names
+Resolve-DnsName <FRONTEND_DOMAIN>
+Resolve-DnsName <API_DOMAIN>
 ```
 
-## Checklist xác nhận
+## Tài liệu tham khảo
 
-- [ ] DNS frontend/API phân giải đúng AWS target.
-- [ ] Hostname khớp certificate và HTTPS mở đúng ứng dụng.
-
-## Lưu ý và bảo mật
-
-Không tạo record public xung đột hay tự nhận domain đã sở hữu khi chưa xác nhận.
-
-## Ảnh chụp thực tế cần bổ sung
-
-**Chụp sau khi triển khai:** Hosted zone, Alias records, kết quả `nslookup`.
-
-Tên file ví dụ `static/images/5-workshop/5.7.3-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.7.3-01.png" alt="Amazon Route 53" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
-
-**Tài liệu AWS:** <https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-cloudfront-distribution.html>
+<https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html>

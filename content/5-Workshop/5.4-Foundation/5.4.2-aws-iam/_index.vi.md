@@ -7,36 +7,37 @@ pre: "<b> 5.4.2. </b> "
 
 # 5.4.2. AWS IAM
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã có role; cần đối chiếu trust policy và quyền tối thiểu.
 
-Tách quyền triển khai của con người khỏi **task execution role** (pull ECR/logs/inject secret) và **task role** của ứng dụng (chỉ cấp API AWS khi cần). Phân quyền người dùng website do Spring Security đảm nhiệm.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Phân quyền cho ECS task execution, backend gọi Bedrock và GitHub Actions deploy.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Vào **IAM → Roles**, phân định quyền triển khai và vai trò ECS; không dùng root user hoặc access key dài hạn.
-2. Tạo **task execution role** có trusted principal `ecs-tasks.amazonaws.com`; cấp quyền ECS execution cần thiết, giới hạn ARN tài nguyên.
-3. Cấp thêm quyền Secrets Manager và KMS decrypt cho execution role **chỉ** nếu dùng secret/key để ECS inject vào container.
-4. Tạo **task role** riêng nếu Spring Boot cần gọi AWS API; không cấp AdminAccess hay dùng chung role execution.
-5. Đảm bảo quyền `iam:PassRole` của người deploy chỉ áp dụng cho role được phê duyệt.
-6. Kiểm tra policy/trust và kết quả khởi động task; lưu ARN/policy, tuyệt đối không công khai secret.
+1. Mở IAM → Roles; xác định tên thực tế của ECS task execution role, task role và CI/CD deployment role.
+2. Đối chiếu execution role: pull image ECR, ghi CloudWatch Logs và lấy secret được tham chiếu trong task definition.
+3. Kiểm tra task role của ứng dụng riêng biệt; xác nhận quyền Bedrock/model chỉ đủ cho backend.
+4. Nếu GitHub Actions dùng OIDC, kiểm tra provider và trust policy; giới hạn `sub` theo repo và branch `feat/prod` dự kiến.
+5. Xem JSON policy và lịch sử dùng nếu có; chỉ điều chỉnh quyền rộng sau khi đã trao đổi nhóm.
+6. Ghi chức năng từng role; IAM của AWS không thay thế phân quyền Guest/Customer/Staff của BTB.
 
+## Kết quả mong đợi và ghi nhận thực tế
 
+**Mong đợi:** Role và trust relationship được tách đúng; quyền Bedrock đủ dùng; không commit access key dài hạn cho CI/CD.
 
-## Checklist xác nhận
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
 
-- [ ] Trusted entity của role ECS chính xác.
-- [ ] Không có quyền quá rộng hoặc khóa truy cập hard-code.
+## Lưu ý vận hành và rủi ro
 
-## Lưu ý và bảo mật
+Không đăng access key, token phiên hoặc khóa bí mật lên workshop.
 
-Không nhầm AWS IAM với quyền Guest/Customer/E-commerce/Logistics/Delivery/Admin của ứng dụng.
+## Ảnh minh chứng cần chụp
 
-## Ảnh chụp thực tế cần bổ sung
+Tên role, tóm tắt trust policy, policy gắn kèm (che nội dung nhạy cảm).
 
-**Chụp sau khi triển khai:** Trust policy của execution role, policy task role, ghi chú Least Privilege.
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.4.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
 
-Tên file ví dụ `static/images/5-workshop/5.4.2-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.4.2-01.png" alt="AWS IAM" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
+## Tài liệu tham khảo
 
-**Tài liệu AWS:** <https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html>
+<https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html>

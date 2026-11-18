@@ -7,35 +7,37 @@ pre: "<b> 5.4.1. </b> "
 
 # 5.4.1. AWS Budgets
 
-## Purpose and BTB use case
+> **Source status, as reported by the BTB team (18 November 2026):** Budget created; amount, threshold and destination must be verified.
 
-Track expected spend before running Fargate, ALB, WAF and data transfer. A budget sends alerts; it does not automatically shut off resources.
+## Objective and actual role
 
-> **Deployment status:** Planned instructional steps; do not mark checks complete without real AWS Console evidence.
+Cost visibility and alert thresholds for BTB production resources.
 
-## Step-by-step lab
+## Lab: inspect, document and verify the existing production setup
 
-1. Open **Billing and Cost Management → Budgets → Create budget** in the AWS account authorized to view billing.
-2. Choose a **Cost budget**, select a monthly period and an estimated budget amount approved by the group (do not invent a USD threshold).
-3. Define actual-cost alert thresholds (for example percentages selected by the team), add a monitored email recipient and confirm notification delivery.
-4. Set useful tags such as `Project=BTB` on resources; where available, activate cost allocation tags in Billing.
-5. Record the budget name, currency, period, threshold, recipient and test/confirmation evidence without publishing personal email addresses.
+1. Open Billing and Cost Management → Budgets → inspect the existing BTB budget before editing it.
+2. Record budget type (cost), period (monthly), currency, scope, and forecast or actual thresholds.
+3. Check email subscribers and whether each notification is confirmed and reaches the intended team mailbox.
+4. Inspect the latest actual/forecast spend and compare with ECS, ALB, CloudFront, WAF and logging usage.
+5. If a dedicated lab budget is missing, create a cost budget with a clearly documented *example* threshold chosen by the team, not an invented production amount.
+6. Capture screenshots with amounts obscured only if project policy requires; never claim an alert fired without an actual email.
 
+## Expected outcome / result recording
 
+**Expected:** Budget exists; thresholds and destinations match recorded values; notification is observable when actually triggered.
 
-## Validation checklist
+**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
 
-- [ ] Budget configuration is visible and status is active.
-- [ ] Compare actual vs forecast cost with the calculator assumptions.
+## Risks and operational notes
 
-## Pitfalls / security
+Budgets is not a hard spending cap; production resources keep incurring charges.
 
-AWS Budgets cannot guarantee a hard spending cap; review usage regularly.
+## Screenshot evidence to capture
 
-## Required personal screenshots
+Budget configuration, notification subscriptions, and cost trend.
 
-**Capture after execution:** Budget detail page, threshold/alert settings, Cost Explorer or cost overview.
+**Suggested path:** `static/images/5-workshop/5.4.1-01.png` (capture from real Console; do not create a fake screenshot).
 
-Use filenames like `static/images/5-workshop/5.4.1-01.png`. Do not upload credentials or customer data. Add a screenshot using `{{</* workshop-image src="images/5-workshop/5.4.1-01.png" alt="AWS Budgets evidence" caption="Recorded from actual deployment" */>}}` **only after the file exists**.
+## Official reference
 
-**AWS documentation:** <https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>
+<https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>

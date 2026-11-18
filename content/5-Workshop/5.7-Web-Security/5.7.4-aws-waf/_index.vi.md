@@ -1,43 +1,43 @@
 ---
-title: "AWS WAF"
+title: "AWS WAF (Frontend & Backend)"
 weight: 4
 chapter: false
 pre: "<b> 5.7.4. </b> "
 ---
 
-# 5.7.4. AWS WAF
+# 5.7.4. AWS WAF (Frontend & Backend)
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã có WAF; rule giới hạn ở BE hiện **Count**, không chặn.
 
-Lọc request bất thường đến BTB bằng Web ACL rule. CloudFront và API trực tiếp qua ALB là **hai phạm vi gắn WAF khác nhau**.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Web ACL xử lý request vào CloudFront và ALB (Count/Block theo từng rule).
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Xác nhận WAF đã triển khai thật hay mới P1; nếu chưa triển khai phải ghi đề xuất, không bịa screenshot.
-2. Vào **AWS WAF → Web ACLs → Create web ACL**, chọn scope **CloudFront (Global)** cho frontend (quản lý tại us-east-1).
-3. Chọn managed rule groups/rate-based rule phù hợp tải; có thể chạy Count mode trước khi Block để tránh false positive.
-4. Associate Web ACL với CloudFront distribution và kiểm tra trạng thái.
-5. Nếu API truy cập ALB trực tiếp và cần bảo vệ API, tạo/dùng **Regional Web ACL** cùng Region ALB rồi attach **riêng**.
-6. Kiểm thử an toàn điều kiện rule có thể mô phỏng, xem sampled requests và tránh chặn nhầm Customer.
-7. Ghi rule, kết quả count/block và thành phần chi phí WAF.
+1. Mở AWS WAF → Web ACLs; xác định ACL global của CloudFront FE và ACL Regional gắn ALB BE (nếu có).
+2. Kiểm tra resource association; WAF của CloudFront không tự bảo vệ API đang truy cập ALB trực tiếp.
+3. Ghi tên rule, priority, điều kiện, managed rule và action đúng với production.
+4. Với **rule giới hạn backend**, phải ghi action `Count`: chỉ đếm match và không tự block request.
+5. Mở Traffic overview/sampled requests, lưu minh chứng CountedRequests bằng traffic hợp lệ; không tạo traffic tấn công để chụp hình.
+6. Đánh giá false positive trước khi đề xuất chuyển sang Block và ghi quy trình phê duyệt.
 
+## Kết quả mong đợi và ghi nhận thực tế
 
+**Mong đợi:** Web ACL FE/BE đúng nơi và rule Count của BE được mô tả đúng, không tuyên bố đã chặn.
 
-## Checklist xác nhận
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
 
-- [ ] Web ACL attach đúng resource mục tiêu.
-- [ ] Sampled requests/count phản ánh rule action dự kiến.
+## Lưu ý vận hành và rủi ro
 
-## Lưu ý và bảo mật
+Action theo từng rule; Count-only chưa phải chặn request. WAF có thể phát sinh phí theo ACL/rule/request.
 
-WAF CloudFront không bảo vệ request ALB trực tiếp. WAF có thể tính phí Web ACL/rule/request.
+## Ảnh minh chứng cần chụp
 
-## Ảnh chụp thực tế cần bổ sung
+Association CloudFront/ALB, action Count và thống kê request match.
 
-**Chụp sau khi triển khai:** Web ACL scope, rule, association, sampled request Count/Block.
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.7.4-01.png` (chụp Console thật; không tự tạo ảnh giả).
 
-Tên file ví dụ `static/images/5-workshop/5.7.4-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.7.4-01.png" alt="AWS WAF" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
+## Tài liệu tham khảo
 
-**Tài liệu AWS:** <https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html>
+<https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-rule-actions.html>

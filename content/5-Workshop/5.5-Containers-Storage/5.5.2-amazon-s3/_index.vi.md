@@ -7,43 +7,44 @@ pre: "<b> 5.5.2. </b> "
 
 # 5.5.2. Amazon S3
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã dùng lưu frontend production.
 
-Lưu **frontend build** React/TypeScript; ảnh sản phẩm/nội dung tiếp tục dùng Cloudinary. Bucket web để private, CloudFront đọc qua Origin Access Control.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Lưu file frontend build; ảnh sản phẩm/avatar dùng Cloudinary, không phải S3 frontend.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Trong frontend, chạy script cài/build thật (Vite thường là `npm ci`, `npm run build`), kiểm tra thư mục `dist/`.
-2. Vào **Amazon S3 → Create bucket**, chọn tên bucket duy nhất và Region đúng kế hoạch.
-3. Bật **Block all public access**; không cho ACL/bucket policy public-read.
-4. Upload **nội dung bản build**, không upload cả thư mục source, qua Console hoặc `aws s3 sync`.
-5. Sau khi tạo CloudFront OAC ở 5.7.2, áp dụng bucket policy CloudFront sinh có Distribution ARN chính xác.
-6. Kiểm tra website tải qua CloudFront, còn truy cập trực tiếp S3 object ẩn danh bị từ chối.
+1. Vào S3 → Buckets, chọn bucket đang chứa frontend build React (`dist/` hoặc `build/`).
+2. Kiểm tra object `index.html`, JS/CSS, Cache-Control, Region, Block Public Access và bucket policy.
+3. Đối chiếu CloudFront origin; nếu bucket private, xác nhận Origin Access Control (OAC) và policy cho CloudFront.
+4. Kiểm tra GitHub Actions sync đúng thư mục build và không vô tình xóa object khác.
+5. Khi lên bản SPA mới, chạy CloudFront invalidation phù hợp rồi tải lại web để xác nhận asset hash mới.
+6. Không dùng bucket frontend để thay thế Cloudinary của ảnh sản phẩm/avatar.
 
-## Ví dụ CLI hoặc câu truy vấn
+## Kết quả mong đợi và ghi nhận thực tế
 
-```bash
-# Với Vite, sau khi xác nhận thư mục output thực tế là dist/:
-npm ci
-npm run build
-aws s3 sync dist/ s3://<FRONTEND_BUCKET>/ --delete
+**Mong đợi:** CloudFront tải asset thành công; nếu dùng OAC thì S3 không public; refresh route SPA đúng cấu hình.
+
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+
+## Lưu ý vận hành và rủi ro
+
+Nếu đội triển khai kiểu S3 origin khác, mô tả cấu hình thực tế thay vì khẳng định có OAC.
+
+## Ảnh minh chứng cần chụp
+
+Objects/permission của bucket, origin CloudFront và web tải thành công.
+
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.5.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
+
+## Lệnh kiểm tra tham khảo (read-only)
+
+```powershell
+# Local sanity check of build folder (choose dist or build as your project uses)
+Get-ChildItem .\dist -ErrorAction SilentlyContinue
 ```
 
-## Checklist xác nhận
+## Tài liệu tham khảo
 
-- [ ] S3 bucket private; có entry file và asset đã hash.
-- [ ] CloudFront đọc được qua OAC.
-
-## Lưu ý và bảo mật
-
-Không dùng S3 static-website public endpoint làm OAC origin của CloudFront.
-
-## Ảnh chụp thực tế cần bổ sung
-
-**Chụp sau khi triển khai:** S3 Block Public Access, object build, bucket policy OAC và request public bị chặn.
-
-Tên file ví dụ `static/images/5-workshop/5.5.2-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.5.2-01.png" alt="Amazon S3" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
-
-**Tài liệu AWS:** <https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>
+<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>

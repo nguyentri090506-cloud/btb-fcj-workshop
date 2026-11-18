@@ -5,42 +5,39 @@ chapter: false
 pre: "<b> 5.1. </b> "
 ---
 
-# 5.1. Tổng quan dự án
+# 5.1. Tổng quan dự án và nghiệp vụ
 
-## Bài toán thực tế
+## Bite to Business là gì?
 
-Bite to Business trực tiếp bán thực phẩm cho cá nhân/hộ gia đình và tổ chức như nhà hàng, khách sạn, cửa hàng, đơn vị suất ăn và hợp tác xã. Website tập trung danh mục, giá theo số lượng, yêu cầu mua (Quote), quản lý kho, đóng gói và giao hàng. Đây **không phải** sàn thương mại điện tử nhiều nhà bán.
+BTB là website **bán thực phẩm trực tiếp** cho Customer cá nhân/hộ gia đình và doanh nghiệp/hợp tác xã. Guest xem catalog/giá/review; Customer đã kích hoạt mới tạo Quote và xác nhận mua sau phê duyệt. Staff gồm **E-commerce Executive** (catalog, volume pricing, promotion, duyệt Quote), **Logistics Staff** (nhập kho, package, phân công chuyến), **Delivery Staff** (giao và xác nhận thực tế), **Admin** (duyệt tài khoản, cấp role, giám sát metric).
 
-## Vai trò và quy trình nghiệp vụ
+## Luồng nghiệp vụ trung tâm
 
-| Vai trò | Nhiệm vụ chính |
-|---|---|
-| Guest | Xem sản phẩm/giá/review công khai, gửi đăng ký |
-| Customer | Tạo Quote, xác nhận mua hợp lệ, theo dõi Order, review |
-| E-commerce Executive | Quản lý danh mục, giá bậc, khuyến mãi và duyệt Quote |
-| Logistics Staff | Nhập kho, chuẩn bị package, phân công chuyến |
-| Delivery Staff | Xem chuyến được phân công, xác nhận hoàn tất giao |
-| Admin | Duyệt tài khoản, quản lý role Staff và giám sát |
+```text
+Guest/Customer → Đăng ký → Admin duyệt → OTP → Đăng nhập
+Customer → Xem sản phẩm/review → Chọn SKU & số lượng → Giá theo bậc
+→ Tạo Quote → Phân bổ đủ hàng vào delivery packages
+→ E-commerce Executive duyệt Quote → Customer xác nhận mua
+→ Backend kiểm tra đủ tất cả dòng hàng & giữ tồn atomically
+→ Order → Logistics đóng hàng → Thanh toán được xác minh (SePay)
+→ Giao chuyến → Delivery Staff xác nhận đã giao thực tế
+```
 
-**Luồng giao dịch chính:** Catalog → chọn SKU/số lượng → backend tính Volume Pricing → Customer gửi Quote → E-commerce Executive duyệt → Customer xác nhận → backend kiểm tra và giữ **đủ toàn bộ** tồn kho theo transaction → Order → Logistics chuẩn bị package → giao hàng. Thiếu một dòng hàng thì không xác nhận một phần; Quote nháp **chưa giữ tồn kho**.
+**Quote chưa giữ hàng**. Khi tạo Order, thiếu **bất cứ** dòng hàng nào thì không được giữ lẻ/tạo Order thành công. Một Order có thể có nhiều package/địa điểm, một chuyến tương ứng một Order trong MVP. ETA chỉ minh họa theo vận tốc cố định 40 km/h, không phải ETA giao thông trực tiếp.
 
-## Phạm vi công nghệ
+## Công nghệ và phạm vi trách nhiệm
 
-- **Frontend:** React, TypeScript, Tailwind CSS, i18n; build tĩnh đặt trên S3 private, phân phối qua CloudFront.
-- **Backend:** Java/Spring Boot dạng modular monolith, Docker image lưu ECR, ECS Fargate chạy tác vụ, ALB nhận API.
-- **Database:** Supabase PostgreSQL bên ngoài AWS, **không tạo Amazon RDS** trong bài này.
-- **Hình ảnh:** Cloudinary lưu ảnh sản phẩm/nội dung; S3 chỉ dùng cho frontend build.
-- **AI và bản đồ:** Gemini/Spring AI/A2UI và Vietmap thuộc tích hợp ứng dụng; Bedrock là phần bạn cùng nhóm và chưa được khẳng định đã tích hợp vào BTB ở bài này.
+| Lớp | Công nghệ | Trách nhiệm |
+|---|---|---|
+| Frontend | React, TypeScript, i18n | Giao diện tin cậy, song ngữ, thao tác người dùng |
+| Backend | Java, Spring Boot, Spring Security | Validation, role, giá, Quote/Order/tồn, giới hạn AI |
+| Database/Auth | Supabase | PostgreSQL và xác thực theo cập nhật; cần kiểm tra cơ chế JWT runtime |
+| AI | Amazon Bedrock | AI inference; backend quyết định nghiệp vụ cuối |
+| FE assets | S3 + CloudFront | Build tĩnh React, CDN/HTTPS |
+| Ảnh sản phẩm/avatar | Cloudinary | Media, không thay S3 frontend |
+| Thanh toán | SePay | QR chuyển khoản/webhook; FE không được tự quyết paid |
+| Email | Gmail SMTP + SNS | OTP ứng dụng và cảnh báo hạ tầng là hai mục khác nhau |
 
-## Tiêu chí hoàn thành
+## Mục tiêu học tập
 
-1. React tải được qua HTTPS, S3 origin là private; tải lại URL trang con thành công.
-2. Spring Boot có API qua HTTPS ALB và Fargate chạy ổn định.
-3. Backend kết nối Supabase theo cấu hình bảo mật được duyệt; API Catalog công khai trả dữ liệu.
-4. Spring Security vẫn phân quyền đúng giữa Customer/Staff; AWS IAM không thay thế phân quyền nghiệp vụ.
-5. Log ECS xuất hiện trong CloudWatch; DNS và WAF hoạt động đúng quy tắc đã cấu hình.
-6. Có ảnh thực tế, dự toán chi phí và quy trình Cleanup.
-
-**Không tuyên bố:** đã tích hợp cổng thanh toán thực, đã triển khai Bedrock, hay có HA production khi chưa có bằng chứng.
-
-**Ảnh cần chụp:** trang React đã deploy, API response, sơ đồ kiến trúc, trạng thái ECS/ALB.
+Nhóm có thể tự vẽ kiến trúc dùng AWS Icons, mô tả HTTP/CI/CD/telemetry, giải thích quyền IAM, kiểm thử tích hợp và hiểu chi phí/rollback production.
