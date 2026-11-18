@@ -7,4 +7,9 @@ pre: "<b> 5.7. </b> "
 
 # 5.7. Phân phối web và bảo mật
 
-Giai đoạn này hướng dẫn **ACM → CloudFront → Route 53 → AWS WAF** cho Bite to Business. Thực hành từng mục con, chụp ảnh AWS Console thật và chỉ ghi thông số/kết quả đã xác minh. Không triển khai hộ phần dịch vụ của bạn cùng nhóm.
+Giai đoạn này ghi cấu hình BTB theo báo cáo của nhóm. Xem từng bài lab, bổ sung kết quả và ảnh chụp resource thật.
+
+- [5.7.1. AWS Certificate Manager (ACM)](5.7.1-aws-certificate-manager/) — Cấp TLS cho tên miền frontend CloudFront và backend ALB.
+- [5.7.2. Amazon CloudFront](5.7.2-amazon-cloudfront/) — Phân phối React SPA từ S3 qua HTTPS/cache và liên kết WAF.
+- [5.7.3. Amazon Route 53](5.7.3-amazon-route-53/) — Bản ghi DNS trỏ hostname frontend về CloudFront và API về ALB.
+- [5.7.4. AWS WAF (Frontend & Backend)](5.7.4-aws-waf/) — Web ACL xử lý request vào CloudFront và ALB (Count/Block theo từng rule).

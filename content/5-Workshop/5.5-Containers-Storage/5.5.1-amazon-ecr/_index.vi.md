@@ -7,43 +7,44 @@ pre: "<b> 5.5.1. </b> "
 
 # 5.5.1. Amazon ECR
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đang dùng trong CI/CD.
 
-Lưu Docker image cho Spring Boot modular monolith. ECR là kho chứa image, không phải nơi thực thi; ECS/Fargate chạy image.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Kho Docker image backend để ECS Fargate kéo về chạy.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Kiểm tra Dockerfile build được từ đúng thư mục backend, dùng Java runtime hợp với dự án.
-2. Vào **Amazon ECR → Private repositories → Create repository**, đặt `btb-backend` hoặc tên được nhóm chốt; bật scanning/encryption phù hợp.
-3. Xem **View push commands** của Region/account; đăng nhập Docker vào ECR qua AWS CLI token.
-4. Build đúng platform, tag bằng version/commit SHA (không chỉ dựa vào `latest`), push lên ECR.
-5. Ghi đúng image URI/digest vào ECS task definition; xem kết quả scan và xử lý lỗ hổng đáng kể.
+1. Mở ECR → Private repositories, xác định repository backend BTB; ghi tên, Region, mã hóa và chiến lược tag thực tế.
+2. Xem Images, ghi digest/tag, thời điểm push và dung lượng của phiên bản đang deploy; không tự đoán số version.
+3. Kiểm tra các bước xác thực, Docker build, push trong GitHub Actions; ưu tiên role ngắn hạn nếu đang cấu hình.
+4. Mở ECS task definition, đối chiếu image URI/digest với ECR; xác nhận đúng bản release chạy thật.
+5. Xem scanning và lifecycle policy; trao đổi trước khi xóa các image cũ để vẫn rollback được.
+6. Lưu bằng chứng push image thành công và ECS triển khai từ pipeline production.
 
-## Ví dụ CLI hoặc câu truy vấn
+## Kết quả mong đợi và ghi nhận thực tế
 
-```bash
-# Thay toàn bộ placeholder; chạy bằng shell đã cấu hình Docker + AWS CLI.
-aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
-docker build -t btb-backend:<IMAGE_TAG> <BACKEND_SOURCE_DIRECTORY>
-docker tag btb-backend:<IMAGE_TAG> <ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/btb-backend:<IMAGE_TAG>
-docker push <ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/btb-backend:<IMAGE_TAG>
+**Mong đợi:** Image digest của ECS đang chạy khớp image trong ECR.
+
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+
+## Lưu ý vận hành và rủi ro
+
+Tag `latest` không đủ truy vết release; nên lưu SHA/digest cố định.
+
+## Ảnh minh chứng cần chụp
+
+Danh sách image ECR, digest và image URI ở ECS task definition.
+
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.5.1-01.png` (chụp Console thật; không tự tạo ảnh giả).
+
+## Lệnh kiểm tra tham khảo (read-only)
+
+```powershell
+# Illustrative only: replace placeholders and ensure AWS CLI auth is configured
+aws ecr describe-images --repository-name <ECR_REPOSITORY> --region <AWS_REGION>
 ```
 
-## Checklist xác nhận
+## Tài liệu tham khảo
 
-- [ ] Image có tag hiển thị trong private repository.
-- [ ] Kiến trúc image tương thích Fargate task.
-
-## Lưu ý và bảo mật
-
-Không commit Docker credential hay registry token vào Git.
-
-## Ảnh chụp thực tế cần bổ sung
-
-**Chụp sau khi triển khai:** ECR repository, image tags và output push image (che thông tin nhạy cảm nếu cần).
-
-Tên file ví dụ `static/images/5-workshop/5.5.1-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.5.1-01.png" alt="Amazon ECR" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
-
-**Tài liệu AWS:** <https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html>
+<https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html>

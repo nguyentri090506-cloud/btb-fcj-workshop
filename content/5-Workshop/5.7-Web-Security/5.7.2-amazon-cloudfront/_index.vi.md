@@ -7,42 +7,37 @@ pre: "<b> 5.7.2. </b> "
 
 # 5.7.2. Amazon CloudFront
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Distribution frontend đã hoạt động.
 
-Phân phối React qua HTTPS, giữ S3 private nhờ OAC. API backend dùng **domain ALB riêng** trong lab này, trừ khi nhóm thực sự triển khai CloudFront API origin routing.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Phân phối React SPA từ S3 qua HTTPS/cache và liên kết WAF.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Vào **CloudFront → Create distribution**, chọn S3 REST origin, **không** dùng website endpoint public.
-2. Tạo/chọn **Origin Access Control (OAC)** và áp bucket policy chỉ cho distribution đọc object S3.
-3. Đặt **Redirect HTTP to HTTPS** và default root object `index.html`.
-4. Với React SPA routes, cấu hình fallback lỗi phù hợp (`403`/`404` về `/index.html` khi cần), tránh che lỗi API.
-5. Thêm alternate domain và ACM viewer certificate ở **us-east-1**.
-6. Publish, test distribution; invalidation khi cập nhật asset hoặc dùng caching versioned.
-7. Kiểm tra truy cập S3 public bị chặn và frontend không lộ secret.
+1. Mở CloudFront → Distributions; chọn distribution FE, ghi ID, alternate domain, trạng thái và behavior.
+2. Xác nhận S3 origin đúng bucket và kiểm tra OAC/bucket policy nếu áp dụng.
+3. Kiểm tra viewer certificate, redirect HTTPS, cache policy và cách trả asset tĩnh.
+4. Kiểm tra fallback cho React SPA deep link bằng custom error/function/rewrite phù hợp; không chuyển mọi 403 thành index.html bừa bãi.
+5. Kiểm tra Web ACL frontend đang gắn với CloudFront, tách riêng WAF backend ALB.
+6. Mở domain thật, xem asset tải được và đối chiếu invalidation sau GitHub Actions deploy.
 
-## Ví dụ CLI hoặc câu truy vấn
+## Kết quả mong đợi và ghi nhận thực tế
 
-```bash
-# Invalidation sau khi upload bản frontend mới nếu cần:
-aws cloudfront create-invalidation --distribution-id <DISTRIBUTION_ID> --paths '/*'
-```
+**Mong đợi:** Domain FE trả trang/asset qua HTTPS và refresh route con hoạt động.
 
-## Checklist xác nhận
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
 
-- [ ] Web HTTPS chạy qua distribution và domain riêng.
-- [ ] Refresh deep link hoạt động; S3 public read bị chặn.
+## Lưu ý vận hành và rủi ro
 
-## Lưu ý và bảo mật
+CloudFront global, không vẽ trong một private/public subnet của VPC.
 
-SPA fallback dành cho frontend, không biến lỗi API 404 thành HTML.
+## Ảnh minh chứng cần chụp
 
-## Ảnh chụp thực tế cần bổ sung
+Distribution, origin, TLS và network request của trình duyệt.
 
-**Chụp sau khi triển khai:** Distribution origins, OAC policy, cache behavior, certificate và trang React chạy thật.
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.7.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
 
-Tên file ví dụ `static/images/5-workshop/5.7.2-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.7.2-01.png" alt="Amazon CloudFront" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
+## Tài liệu tham khảo
 
-**Tài liệu AWS:** <https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>
+<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html>

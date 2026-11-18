@@ -7,37 +7,37 @@ pre: "<b> 5.4.3. </b> "
 
 # 5.4.3. Amazon VPC
 
-## Mục tiêu và tình huống BTB
+> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã có VPC, route, IGW; cần kiểm tra vị trí subnet và đường outbound thực tế.
 
-Cô lập Fargate chạy Spring Boot khỏi inbound Internet, để public ALB kết nối ECS private. Bạn cùng nhóm lo NAT và VPC endpoints; dùng cấu hình outbound đã xác thực của bạn đó.
+## Mục tiêu và vai trò trong hệ thống
 
-> **Trạng thái:** Đây là hướng dẫn dự kiến, chỉ đánh dấu hoàn thành khi có bằng chứng AWS Console thật.
+Mạng cho ALB public và ECS backend; subnet, route table, Internet Gateway.
 
-## Thực hành từng bước
+## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Chọn CIDR không trùng (ví dụ `10.20.0.0/16` **chỉ minh họa**) và Region, ghi rõ quyết định.
-2. Vào **VPC → Create VPC**, bật hỗ trợ DNS/DNS hostname phù hợp hệ thống.
-3. Tạo public subnet trong ít nhất hai AZ cho ALB và private subnet cho ECS theo kiến trúc đã chốt.
-4. Attach Internet Gateway và cấu hình route `0.0.0.0/0` của public subnet tới Internet Gateway.
-5. Phối hợp bạn cùng nhóm để route table **private** có đường outbound đã chọn; kiểm tra TLS tới Supabase và bên cung cấp AI/hình ảnh.
-6. Tạo **ALB security group** cho cổng viewer phù hợp; **ECS security group** chỉ nhận `BACKEND_PORT` từ ALB security group.
-7. Kiểm tra route, subnet association, IP khả dụng và nguồn vào SG trước khi tạo ECS service.
+1. Vào VPC → Your VPCs, chọn VPC BTB hiện có; ghi Region, VPC ID, CIDR thực tế, không chép CIDR ví dụ trên sơ đồ.
+2. Mở Resource map và Subnets; ghi AZ, subnet public/private và route-table association đã cấu hình.
+3. Kiểm tra Internet Gateway và public route; ALB public cần route/ingress phù hợp để nhận traffic internet.
+4. Xác nhận vị trí ECS task và đường outbound tới Supabase, Cloudinary, Vietmap, SePay, Bedrock và SMTP; Internet Gateway không tự cấp internet cho ECS private.
+5. Kiểm tra security group của ALB cho HTTPS hợp lệ và security group ECS chỉ cho phép cổng BE từ ALB SG.
+6. Chụp VPC map, route tables, SG và thông số network của ECS; nếu chưa xác nhận đường private route thì ghi chưa xác minh.
 
+## Kết quả mong đợi và ghi nhận thực tế
 
+**Mong đợi:** ALB health check đúng, ECS truy cập được dịch vụ cần dùng và cổng BE không mở trực tiếp ra Internet.
 
-## Checklist xác nhận
+**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
 
-- [ ] Public subnet của ALB có route IGW; private subnet ECS có outbound đã xác thực.
-- [ ] Port backend không mở từ `0.0.0.0/0`.
+## Lưu ý vận hành và rủi ro
 
-## Lưu ý và bảo mật
+Subnet và số AZ phải lấy từ Console. Không mặc định hệ thống đã có NAT Gateway hay VPC endpoint.
 
-ALB public không cấp outbound Internet cho ECS private; không tạo NAT/endpoint ở workshop cá nhân, nhưng phải xác minh phần bạn phụ trách.
+## Ảnh minh chứng cần chụp
 
-## Ảnh chụp thực tế cần bổ sung
+VPC resource map, route subnet, SG inbound/outbound, ECS task networking.
 
-**Chụp sau khi triển khai:** VPC resource map, route tables, danh sách subnet, inbound rules của ALB/ECS SG.
+**Đường dẫn gợi ý:** `static/images/5-workshop/5.4.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
 
-Tên file ví dụ `static/images/5-workshop/5.4.3-01.png`. Không upload credential hay dữ liệu khách hàng. Chỉ chèn `{{</* workshop-image src="images/5-workshop/5.4.3-01.png" alt="Amazon VPC" caption="Ảnh thực tế sau triển khai" */>}}` **khi đã có file ảnh**.
+## Tài liệu tham khảo
 
-**Tài liệu AWS:** <https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html>
+<https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html>

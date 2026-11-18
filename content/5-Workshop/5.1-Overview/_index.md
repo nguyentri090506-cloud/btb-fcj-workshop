@@ -5,42 +5,39 @@ chapter: false
 pre: "<b> 5.1. </b> "
 ---
 
-# 5.1. Project Overview
+# 5.1. Project & Business Overview
 
-## Business problem
+## What is Bite to Business?
 
-Bite to Business directly sells food to households and organizations such as restaurants, hotels, shops, canteens and cooperatives. It centralizes product browsing, quantity-tier pricing, order requests (Quotes), stock control, packing and deliveries. The website is not a marketplace and does not offer customers a choice of independent sellers.
+BTB is a **direct food seller** to Customer accounts representing individuals/households or businesses/cooperatives. A Guest may view catalog/prices/reviews; an activated Customer can create purchase Quotes and place Orders after approval. Staff roles are **E-commerce Executive** (catalog, volume pricing, promotions, Quote approval), **Logistics Staff** (stock receipts, packages and trip assignment), **Delivery Staff** (assigned delivery and completion) and **Admin** (account approval, staff roles and operational metrics).
 
-## Roles and key workflows
+## Core business workflow
 
-| Role | Main responsibility |
-|---|---|
-| Guest | Browse public products, public pricing and reviews; request registration |
-| Customer | Manage Quotes, confirm eligible purchases, track Orders and review products |
-| E-commerce Executive | Manage catalog, volume pricing, promotions, review/approve Quotes |
-| Logistics Staff | Receive stock, prepare packages, assign deliveries |
-| Delivery Staff | View assigned trip, confirm delivery completion |
-| Admin | Approve accounts, manage Staff roles and monitor operations |
+```text
+Guest/Customer → Register → Admin approves → OTP activation → Login
+Customer → Browse catalog/reviews → Select SKU & quantity → Volume price
+→ Create Quote → Allocate all quantities to delivery packages
+→ E-commerce Executive approves Quote → Customer confirms purchase
+→ Backend rechecks all line items and reserves all stock atomically
+→ Order → Logistics packs → Payment confirmation (SePay integration)
+→ Delivery assignment → Delivery Staff completes actual delivery
+```
 
-**Core transaction:** Catalog → choose SKU/quantity → backend calculates Volume Pricing → Customer submits Quote → E-commerce Executive approval → Customer confirms → backend atomically checks/reserves **all** required stock → Order → logistics packages → delivery. If even one line lacks stock, confirmation fails as a whole; a draft Quote does **not** reserve stock.
+A **Quote does not reserve stock**. If **any** requested item is short when placing the Order, no partial stock reservation or successful Order should occur. One Order may have multiple delivery packages/destinations, with a single trip for the Order in the MVP. ETA is illustrative, based on a fixed 40 km/h assumption rather than live traffic.
 
-## Technical scope
+## Technology and responsibility split
 
-- **Frontend:** React, TypeScript, Tailwind CSS, i18n; compiled static files on private Amazon S3 behind CloudFront.
-- **Backend:** Java/Spring Boot modular monolith, container image in ECR, ECS tasks on Fargate, ALB as API entry point.
-- **Database:** External Supabase PostgreSQL; this workshop does not create Amazon RDS.
-- **Media:** Cloudinary hosts product and site images; S3 holds the compiled frontend, not the product-image catalog.
-- **AI and maps:** Gemini/Spring AI/A2UI and Vietmap are application-level/external integrations. Amazon Bedrock belongs to the teammate's separate scope and must not be claimed as implemented here.
+| Layer | Technology | Responsibility |
+|---|---|---|
+| Frontend | React, TypeScript, i18n | Trusted UI, language switching, application behavior |
+| Backend | Java, Spring Boot, Spring Security | Validation, roles, pricing, Quote/Order/stock rules, AI action boundaries |
+| Database/Auth | Supabase | PostgreSQL and reported auth usage; validate JWT ownership in running code |
+| AI | Amazon Bedrock | Model inference; final business authorization remains backend-owned |
+| Frontend assets | S3 + CloudFront | Static web build and HTTPS delivery |
+| Product and avatar imagery | Cloudinary | Images/media, not frontend build files |
+| Payment | SePay | Bank-transfer QR and payment callback; never trust frontend-only success |
+| Email | Gmail SMTP + SNS | OTP/application mail vs AWS infrastructure alert mail |
 
-## Practical success criteria
+## Learning objectives
 
-1. React pages load via HTTPS with a private S3 origin; refresh on a deep link works.
-2. Spring Boot exposes an authorized API via HTTPS ALB and stable Fargate tasks.
-3. Backend can reach Supabase over its approved secure connection; a known public Catalog endpoint responds.
-4. Permissions for Customer vs Staff remain enforced in Spring Security (AWS IAM is not a substitute).
-5. ECS startup/health/error logs are visible in CloudWatch; request filtering and DNS behave as configured.
-6. Measured deployment evidence, a cost estimate and cleanup procedure are published.
-
-**Not claimed:** real payment-gateway integration, completed AI/Bedrock deployment, or production-grade high availability without measured evidence.
-
-**Evidence to capture:** final React home page; API response; architecture image; ECS/ALB deployment state.
+By the end of the lab, the team should be able to reconstruct the production architecture using official AWS service icons, trace end-to-end HTTP/CI/CD/telemetry flows, identify IAM/security boundaries, verify each integration and explain operational costs and rollback.

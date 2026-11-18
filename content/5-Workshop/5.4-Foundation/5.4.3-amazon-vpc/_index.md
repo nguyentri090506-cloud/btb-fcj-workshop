@@ -7,37 +7,37 @@ pre: "<b> 5.4.3. </b> "
 
 # 5.4.3. Amazon VPC
 
-## Purpose and BTB use case
+> **Source status, as reported by the BTB team (18 November 2026):** VPC, routes and IGW configured; exact subnet placement/egress to external providers must be recorded.
 
-Isolate Spring Boot Fargate workloads from public ingress while connecting the public ALB to private ECS tasks. The teammate handles NAT and VPC endpoints; use their verified egress design.
+## Objective and actual role
 
-> **Deployment status:** Planned instructional steps; do not mark checks complete without real AWS Console evidence.
+Networking for public ALB and backend ECS tasks, including subnets, routes and Internet Gateway.
 
-## Step-by-step lab
+## Lab: inspect, document and verify the existing production setup
 
-1. Choose a non-overlapping CIDR plan (example `10.20.0.0/16` **illustrative only**) and a Region; record decisions before creating resources.
-2. Open **VPC → Create VPC** and create a VPC with DNS support/hostnames enabled as appropriate for the deployment.
-3. Create public subnets in at least two AZs for the ALB and private subnets for ECS tasks if the planned architecture requires it.
-4. Attach an Internet Gateway and configure the public subnet route table with a default route to it.
-5. Coordinate with the teammate to ensure the **private** route table has the intended outbound path; validate external TLS access to Supabase and image/AI providers.
-6. Create **ALB security group** allowing intended viewer ports; create **ECS security group** allowing `BACKEND_PORT` only from the ALB security group.
-7. Inspect routes, subnet associations, available IPs and security group sources before creating Fargate service.
+1. Open VPC → Your VPCs, select the existing BTB VPC and record the actual Region, VPC ID and CIDR; do not copy example CIDRs from a diagram.
+2. Use the VPC resource map and Subnets view to record actual Availability Zones, public/private mapping and route-table associations.
+3. Check the Internet Gateway attachment and public routes; a public ALB normally requires internet-reachable subnets with appropriate ingress rules.
+4. Verify ECS tasks' real network placement and outbound connectivity toward Supabase, Cloudinary, Vietmap, SePay, Bedrock and SMTP; do not assume an Internet Gateway alone gives private tasks internet access.
+5. Check the ALB security group allows intended HTTPS ingress and the ECS security group permits the backend application port only from ALB security group.
+6. Capture the VPC map, route tables, security groups and ECS task network settings; mark private-route design as unresolved if not verified.
 
+## Expected outcome / result recording
 
+**Expected:** ALB health checks work, ECS can reach required third parties, and backend port is not directly internet-accessible.
 
-## Validation checklist
+**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
 
-- [ ] ALB public subnets have IGW routes; ECS private subnets use verified outbound networking.
-- [ ] Backend port is not open to `0.0.0.0/0`.
+## Risks and operational notes
 
-## Pitfalls / security
+Public subnet/private subnet and number of Availability Zones must reflect current AWS Console. NAT Gateway / VPC endpoints are not presumed deployed.
 
-A public ALB does not provide outbound internet to private ECS; do not create NAT/endpoints in this personal lab, but validate teammate configuration.
+## Screenshot evidence to capture
 
-## Required personal screenshots
+VPC resource map, subnet routes, SG inbound/outbound, ECS task networking.
 
-**Capture after execution:** VPC resource map, route tables, subnet list, ALB/ECS security group inbound rules.
+**Suggested path:** `static/images/5-workshop/5.4.3-01.png` (capture from real Console; do not create a fake screenshot).
 
-Use filenames like `static/images/5-workshop/5.4.3-01.png`. Do not upload credentials or customer data. Add a screenshot using `{{</* workshop-image src="images/5-workshop/5.4.3-01.png" alt="Amazon VPC evidence" caption="Recorded from actual deployment" */>}}` **only after the file exists**.
+## Official reference
 
-**AWS documentation:** <https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html>
+<https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html>

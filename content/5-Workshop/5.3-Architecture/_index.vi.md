@@ -5,49 +5,50 @@ chapter: false
 pre: "<b> 5.3. </b> "
 ---
 
-# 5.3. Kiến trúc và luồng dữ liệu
+# 5.3. Kiến trúc production và luồng dữ liệu
 
-## Sơ đồ draw.io — tự hoàn thiện
+Dùng **AWS Architecture Diagram do nhóm tự vẽ/kiểm tra bằng draw.io với AWS 2026 Icons**. Chỉ đưa PNG cuối khi đã đối chiếu topology đang chạy. Không ghi CIDR, Region, 2 AZ hoặc NAT là dữ liệu thật nếu AWS Console chưa xác nhận.
 
-Ông cần **tự vẽ và kiểm tra bản kiến trúc cuối** bằng thư viện AWS Architecture Icons trong draw.io. Thể hiện ranh giới AWS Cloud, Region, VPC, public/private subnet ở hai Availability Zone (nếu đã triển khai thật), dịch vụ ngoài AWS, mũi tên request và chú thích phạm vi phụ trách. Lưu file `.drawio` tự chỉnh sửa và xuất PNG rõ nét. Không nộp nguyên sơ đồ do AI sinh 100% như sản phẩm tự thiết kế.
+**File ảnh dự kiến:** `static/images/5-workshop/architecture/btb-production-reviewed.png`.
 
-**Vị trí ảnh sau khi tự hoàn thiện:** `static/images/5-workshop/architecture/btb-architecture-final.png` (thêm ảnh thật và shortcode `workshop-image` được cung cấp).
-
-## Luồng dữ liệu mục tiêu
+## Kiến trúc logic (chưa xác minh subnet thực tế)
 
 ```text
-Frontend: Browser → Route 53 DNS → CloudFront (+ WAF nếu có)
-                → S3 private (OAC) → tài nguyên React/TypeScript
-API:      Browser → Route 53 DNS → HTTPS ALB (+ WAF vùng nếu có)
-                → ECS Fargate trong VPC → các module Spring Boot
-Dữ liệu:  Spring Boot → Supabase PostgreSQL (dịch vụ ngoài; TLS)
-Ảnh:      Browser/Backend → Cloudinary (theo thiết kế ứng dụng)
-AI:       Spring Boot → Gemini/Spring AI (nếu đã bật)
-Bản đồ:   Browser/Backend → Vietmap (nếu đã bật)
-Vận hành: ECS lấy image từ ECR; secret từ Secrets Manager; log → CloudWatch Logs
+Người dùng (Guest / Customer / Staff / Admin)
+  |-- domain FE (Route 53) --> CloudFront + WAF frontend --> S3 React build
+  |       |-- HTTPS cert: ACM (CloudFront dùng cert tại us-east-1)
+  |       `-- RUM client -> Cognito Identity Pool -> CloudWatch RUM
+  `-- domain API (Route 53) --> ALB + WAF regional BE [rule giới hạn: COUNT]
+                                    --> ECS Fargate (Spring Boot trong VPC)
+                                          |-- ECR image, Secrets Manager, IAM
+                                          |-- Supabase PostgreSQL / Auth được nhóm báo cáo
+                                          |-- Bedrock [endpoint production chưa xác minh]
+                                          |-- Cloudinary ảnh
+                                          |-- Vietmap bản đồ/địa chỉ
+                                          |-- SePay QR & webhook xác thực
+                                          `-- Gmail SMTP gửi OTP
+
+CloudWatch Logs + Metrics/Alarms -> SNS -> email vận hành
+AWS Budgets -> email cảnh báo chi phí
+GitHub `feat/prod` -> Actions -> ECR/ECS (BE); S3/CloudFront (FE)
 ```
 
-**Lưu ý mạng:** ALB public **không** tạo outbound internet cho ECS private. Cần lấy cấu hình NAT Gateway/VPC endpoints thực tế từ bạn cùng nhóm và kiểm tra kết nối tới Supabase/Gemini/Cloudinary. VPC endpoints không thay thế internet outbound tới nhà cung cấp ngoài AWS.
+## Giải thích các luồng
 
-**Lưu ý HTTPS:** Chứng chỉ ACM của CloudFront viewer phải ở `us-east-1`; chứng chỉ của ALB cùng Region với ALB. Nếu frontend/API dùng subdomain riêng thì phải vẽ rõ hai đường HTTPS, không tự giả định tất cả API đi qua CloudFront.
+1. **Frontend:** Browser tra DNS, TLS với CloudFront và tải SPA; S3 là origin, không phải trang HTTPS công khai chính.
+2. **API:** Browser tra DNS API và kết nối HTTPS đến ALB; WAF regional được **associate** với ALB, không phải proxy đứng riêng; ALB forward task ECS.
+3. **Webhook thanh toán:** SePay gửi callback vào backend; backend kiểm tra xác thực, event id và thanh toán trước khi cập nhật Order.
+4. **Email ứng dụng:** Spring Boot dùng Gmail SMTP gửi OTP; SNS gửi email CloudWatch Alarm chứ không gửi OTP.
+5. **Monitoring:** ECS logs đến CloudWatch Logs; metrics tới alarms/SNS; browser RUM dùng credential giới hạn qua Cognito Identity Pools.
+6. **CI/CD:** GitHub Actions trên `feat/prod` build/deploy FE lên S3/CloudFront và BE lên ECR/ECS.
 
-## Phân chia phạm vi
+## Checklist sơ đồ trước khi nộp
 
-| Người phụ trách | Dịch vụ |
-|---|---|
-| **Workshop của ông** | VPC, IAM, Budgets, ECR, ECS/Fargate, ALB, S3, CloudFront, Route 53, ACM, Secrets Manager, WAF, CloudWatch Logs |
-| **Bạn cùng nhóm — chỉ đưa vào sơ đồ** | Bedrock, SQS, SES, CodePipeline/CodeBuild, CloudWatch Metrics/Alarms, CloudTrail, NAT Gateway/VPC endpoints |
-| **Tích hợp ngoài AWS** | Supabase PostgreSQL, Cloudinary, Gemini, Vietmap |
+- [ ] CloudFront, Route 53, SNS không nằm trong một subnet riêng của VPC.
+- [ ] Phân biệt resource Region và global; cert CloudFront ở us-east-1.
+- [ ] Subnet/AZ, NAT/egress và IAM giống AWS Console.
+- [ ] Có WAF FE/BE, ghi rule BE là **Count**, chưa block.
+- [ ] Supabase, Cloudinary, Vietmap, SePay, Gmail SMTP ở ngoài AWS Cloud.
+- [ ] Bedrock/RUM ghi **cần kiểm chứng** nếu chưa test production.
 
-Spring Boot/database giữ phân quyền, giá bậc số lượng, duyệt Quote, giữ đủ tồn kho, trạng thái Order; AWS cung cấp hạ tầng lưu trữ/triển khai/mạng/giám sát.
-
-## Bảo mật và độ tin cậy
-
-- Không mở container port ECS trực tiếp ra internet; inbound chỉ từ ALB security group.
-- IAM role theo Least Privilege; token/password không nằm trong Git và được cấp cho runtime an toàn.
-- Bật S3 Block Public Access và CloudFront OAC.
-- ALB health check dùng endpoint an toàn được mở quyền có chủ đích.
-- Nếu cần HA hai AZ, kiểm tra subnet, health check và số task đủ, cân nhắc chi phí.
-- WAF trên CloudFront **không tự bảo vệ** ALB API truy cập riêng.
-
-**Checklist sơ đồ:** đúng icon AWS, Region/AZ/VPC, luồng ingress/egress, giao thức/port, nơi lưu dữ liệu, phân biệt AWS và dịch vụ ngoài, tài nguyên tính phí, owner và ảnh chụp thực tế.
+Các bài 5.4–5.10 giải thích chi tiết. Không đăng sơ đồ có IP/CIDR hoặc resource tự đoán.

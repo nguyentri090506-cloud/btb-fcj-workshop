@@ -5,28 +5,32 @@ chapter: false
 pre: "<b> 5. </b> "
 ---
 
-# Triển khai Bite to Business lên AWS
+# Triển khai Bite to Business trên AWS — Workshop toàn hệ thống
 
-Đây là **workshop thực hành về hạ tầng** cho ứng dụng bán thực phẩm **Bite to Business (BTB)**. BTB trực tiếp bán hàng cho cá nhân/hộ gia đình và doanh nghiệp/hợp tác xã; **không phải sàn nhiều người bán**. Backend dùng Spring Boot modular monolith; frontend dùng React/TypeScript.
+Workshop trình bày **kiến trúc production do nhóm báo cáo** và hướng dẫn đối chiếu, xác minh, xử lý lỗi và viết minh chứng. Bản này bao gồm **toàn bộ dịch vụ của cả nhóm**, không còn chỉ phần riêng một thành viên. **Bite to Business (BTB)** là website bán thực phẩm trực tiếp, ưu tiên khách doanh nghiệp nhưng vẫn hỗ trợ cá nhân/hộ gia đình; **không phải marketplace nhiều người bán**.
 
-**Phạm vi của cá nhân:** Amazon VPC, AWS IAM, AWS Budgets, Amazon ECR, Amazon S3, AWS Secrets Manager, Application Load Balancer, Amazon ECS với AWS Fargate, AWS Certificate Manager, Amazon CloudFront, Amazon Route 53, AWS WAF và Amazon CloudWatch Logs.
+Frontend React/TypeScript được triển khai qua **S3 → CloudFront**, kết hợp **Route 53, ACM và WAF**. Backend Java Spring Boot modular monolith chạy **ECS + Fargate** sau **Application Load Balancer**, Docker image lưu **ECR**. Nhóm dùng **IAM, Secrets Manager, CloudWatch Logs/Metrics/Alarms, SNS, Budgets, CloudWatch RUM và Cognito Identity Pools**, cùng **Amazon Bedrock** cho mô hình AI. **Supabase, Cloudinary, Vietmap, SePay và Gmail SMTP** là dịch vụ ngoài AWS. **GitHub Actions** deploy FE/BE từ `feat/prod`.
 
-**Không hướng dẫn triển khai phần bạn cùng nhóm:** Amazon Bedrock, SQS, SES, CodePipeline/CodeBuild, CloudWatch Metrics/Alarms, CloudTrail, NAT Gateway và VPC endpoints. Các dịch vụ này chỉ xuất hiện trong **sơ đồ tổng thể** để giải thích kết nối.
+**Giới hạn minh chứng:** trạng thái được tổng hợp từ bảng nhóm gửi ngày **18/11/2026**, chưa phải kết quả truy cập AWS Console trực tiếp. API Bedrock production và dữ liệu RUM **cần kiểm chứng**; rule giới hạn WAF backend là **Count**, chưa chặn. Tài liệu nghiệp vụ cũ còn nhắc Gemini và mâu thuẫn về Supabase Auth/JWT nên phải đối chiếu code production trước khi chốt.
 
-**Documentation status / Trạng thái tài liệu:** Draft instructions. Resource names, values, test results, demo links and screenshots must be replaced with real evidence before submission. / Bản nháp hướng dẫn. Cần thay tên tài nguyên, thông số, kết quả kiểm thử, link demo và ảnh chụp bằng minh chứng thực tế trước khi nộp.
+**Không tự đưa vào production:** SQS, SES, CodePipeline/CodeBuild, CloudTrail, NAT Gateway và VPC endpoints từng nằm trong các kế hoạch cũ nhưng **không có trong danh sách production cập nhật**. Không mô tả chúng như đã chạy.
 
 ## Mục lục
 
-1. [Tổng quan](5.1-overview/)
-2. [Chuẩn bị](5.2-prerequisites/)
-3. [Kiến trúc và luồng dữ liệu](5.3-architecture/)
-4. [Thiết lập nền tảng](5.4-foundation/)
-5. [Container và lưu trữ](5.5-containers-storage/)
-6. [Triển khai Backend](5.6-backend/)
-7. [Phân phối web và bảo mật](5.7-web-security/)
-8. [Nhật ký và xử lý lỗi](5.8-logging/)
-9. [Kiểm thử, xác nhận và demo](5.9-testing/)
-10. [Dự toán và tối ưu chi phí](5.10-cost/)
-11. [Dọn dẹp tài nguyên](5.11-cleanup/)
+- [5.1. Tổng quan](5.1-overview/)
+- [5.2. Chuẩn bị](5.2-prerequisites/)
+- [5.3. Kiến trúc và luồng dữ liệu](5.3-architecture/)
+- [5.4. Mạng và thiết lập nền tảng](5.4-foundation/)
+- [5.5. Container và lưu trữ](5.5-containers-storage/)
+- [5.6. Triển khai Backend và AI](5.6-backend-ai/)
+- [5.7. Phân phối web và bảo mật](5.7-web-security/)
+- [5.8. Giám sát và cảnh báo](5.8-monitoring-alerts/)
+- [5.9. Tích hợp dịch vụ bên ngoài](5.9-external-integrations/)
+- [5.10. Triển khai CI/CD](5.10-ci-cd/)
+- [5.11. Kiểm thử và trình diễn](5.11-testing/)
+- [5.12. Dự toán chi phí](5.12-cost/)
+- [5.13. Dọn tài nguyên và khắc phục lỗi](5.13-cleanup/)
 
-**Trước khi nộp:** Tự vẽ và kiểm tra sơ đồ AWS bằng icon chính thức; trực tiếp thực hành, ghi lại ảnh AWS Console, output lệnh, kết quả đo, bảng dự toán chi phí và minh chứng demo. Bản nháp và workshop mẫu không thay thế cho triển khai thực tế.
+## Quy tắc ghi minh chứng
+
+Mỗi bài có tình trạng nhóm báo, các bước thao tác/đối chiếu, kết quả mong đợi, ô để điền kết quả thực và vị trí gợi ý chụp màn hình. **Phải thay placeholder bằng ảnh AWS Console có ngày giờ**, log CI/CD và bài test đã che dữ liệu. Không trình bày ví dụ thành kết quả đã kiểm thử. Không đưa secret hay hồ sơ Customer lên GitHub.

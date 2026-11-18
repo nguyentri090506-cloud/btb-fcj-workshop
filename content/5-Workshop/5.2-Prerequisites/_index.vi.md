@@ -5,46 +5,30 @@ chapter: false
 pre: "<b> 5.2. </b> "
 ---
 
-# 5.2. Điều kiện tiên quyết
+# 5.2. Chuẩn bị
 
-## Tài khoản và quyền
+**Workshop này ưu tiên kiểm tra/xác minh hệ thống production đã có.** Không tự tạo trùng tài nguyên đang chạy. Thí nghiệm thay đổi/xóa cấu hình chỉ làm ở môi trường lab riêng có phép.
 
-Chuẩn bị tài khoản/role AWS có quyền đúng mức cần thiết cho VPC, IAM, Budgets, ECR, ECS/Fargate, ELB, S3, CloudFront, ACM, Route 53, Secrets Manager, WAF và CloudWatch Logs. Không dùng root user để thao tác thường ngày. Xác nhận quyền sở hữu domain và quyền truy cập Supabase/nhà cung cấp hình ảnh bên ngoài.
+## Quyền truy cập và công cụ
 
-## Công cụ
+1. AWS account có quyền đọc VPC, ECS, ECR, S3, ALB, ACM, Route 53, WAF, CloudWatch, SNS, RUM, Cognito, IAM, Secrets Manager và Bedrock. Xin role ít quyền; sửa production phải được phê duyệt.
+2. Truy cập GitHub repo FE/BE và Actions branch `feat/prod`; Docker, Java/Spring Boot, Node/npm, PowerShell, `git`, AWS CLI và `curl` (nếu cần).
+3. Có FE/API domain thật, AWS Region, ECS cluster/service, ECR repo, S3 bucket, CloudFront distribution, ALB target group, SNS topic và RUM monitor.
+4. Dùng tài khoản Customer/Staff/Admin thử và dữ liệu demo; không đưa thông tin khách thật hoặc giao dịch thật lên workshop.
+5. Ảnh minh chứng cần thể hiện cấu hình/kết quả; che ARN/account nếu policy yêu cầu và **luôn che secret**.
 
-- Git, Docker (Linux containers), AWS CLI v2, Node.js/npm, Java 21+ và công cụ build backend đang dùng thực tế.
-- Source React/TypeScript và Spring Boot ở nhánh đã được nhóm thống nhất.
-- Region AWS, port backend, health endpoint, Account ID, domain/subdomain, DB host/port, kiến trúc container.
-- AWS Pricing Calculator và công cụ chụp screenshot; che mọi token, password và khóa JWT trong ảnh.
+## Bảng thông số cần điền trước
 
-## Kiểm tra máy (PowerShell)
+| Biến | Ví dụ / yêu cầu | Giá trị thực |
+|---|---|---|
+| `AWS_REGION` | Region đang chạy BE | TODO |
+| `FRONTEND_DOMAIN` | Domain frontend HTTPS | TODO |
+| `API_DOMAIN` | Hostname API HTTPS | TODO |
+| `ECS_CLUSTER`, `ECS_SERVICE` | Tên ECS production | TODO |
+| `ECR_REPOSITORY`, `S3_BUCKET` | Repo image/bucket frontend | TODO |
+| `BEDROCK_MODEL_ID` | Model/inference profile thật | TODO |
+| `RUM_MONITOR`, `SNS_TOPIC` | Resource monitoring thật | TODO |
 
-```powershell
-git --version
-docker --version
-aws --version
-node --version
-java -version
-aws sts get-caller-identity
-aws configure list
-```
+## Bảo đảm an toàn
 
-Build frontend theo `package.json` thật (thường `npm ci`, `npm run build`), không đoán đường dẫn. Backend dùng lệnh Maven/Gradle chính xác của repository; xem `Dockerfile` trước khi build.
-
-## Phiếu cấu hình cần điền
-
-| Biến | Ý nghĩa |
-|---|---|
-| `AWS_REGION` | Region của ECS, VPC, ALB, ECR và log |
-| `ACCOUNT_ID` | Số tài khoản AWS, không phải secret |
-| `BACKEND_PORT` | Port Spring Boot lắng nghe trong container |
-| `HEALTH_PATH` | API health cho ALB, ví dụ readiness endpoint được cho phép có chủ ý |
-| `FRONTEND_BUCKET` | Bucket S3 private, tên duy nhất |
-| `FRONTEND_DOMAIN` | Domain web React |
-| `API_DOMAIN` | Subdomain API của ALB |
-| `ECR_REPOSITORY` | Repository Docker image backend |
-
-**Phụ thuộc:** ECS private phải có đường outbound hợp lệ tới Supabase và nếu sử dụng thì Gemini/Cloudinary. NAT Gateway/VPC endpoints do bạn cùng nhóm triển khai, cần lấy thông tin thực tế trước khi chạy ECS.
-
-**Ảnh cần chụp:** phiên bản tool (không lộ secrets), AWS identity, Region, bảng thông số đã dùng.
+Xin phép trước khi đổi WAF, IAM, SG, ECS, DB, webhook hoặc DNS. Ưu tiên thao tác đọc. Lưu ảnh vào `static/images/5-workshop/`, không đính kèm credential.

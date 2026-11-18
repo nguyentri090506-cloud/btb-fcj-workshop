@@ -1,43 +1,43 @@
 ---
-title: "AWS WAF"
+title: "AWS WAF (Frontend & Backend)"
 weight: 4
 chapter: false
 pre: "<b> 5.7.4. </b> "
 ---
 
-# 5.7.4. AWS WAF
+# 5.7.4. AWS WAF (Frontend & Backend)
 
-## Purpose and BTB use case
+> **Source status, as reported by the BTB team (18 November 2026):** WAF in use; backend limiting rules currently **Count**, not blocking.
 
-Filter selected malicious or excessive web requests to BTB using Web ACL rules. CloudFront and a direct ALB API are **different** attachment scopes.
+## Objective and actual role
 
-> **Deployment status:** Planned instructional steps; do not mark checks complete without real AWS Console evidence.
+Web ACLs filter or count frontend CloudFront and backend ALB requests.
 
-## Step-by-step lab
+## Lab: inspect, document and verify the existing production setup
 
-1. Identify whether WAF is actually deployed. If still a planned P1 security feature, document it as proposed and do not fabricate screenshots.
-2. Open **AWS WAF → Web ACLs → Create web ACL**, choose scope **CloudFront (Global)** for the frontend distribution (managed in us-east-1).
-3. Select conservative managed rule groups and/or a rate-based rule, estimate request load, and decide Count mode before blocking where risk of false positives exists.
-4. Associate the Web ACL with the CloudFront distribution and verify its association.
-5. If the API is exposed directly via ALB and API filtering is required, create/use a **Regional Web ACL** in the ALB Region and associate it with the ALB separately.
-6. Safely test a known rule condition without sending harmful traffic; review sampled requests and avoid accidentally blocking legitimate customer sessions.
-7. Record rule, request/count/block behavior and WAF pricing components.
+1. Open AWS WAF → Web ACLs; identify the CloudFront-scope (global) frontend ACL and the Regional ACL associated with ALB if present.
+2. Inspect associations and verify each ACL protects the correct resource; a CloudFront ACL does not automatically cover API requests hitting ALB directly.
+3. Record rules, priorities, conditions, managed rules and actions exactly as deployed.
+4. For the **backend limiting rule**, explicitly record `Count` action, which records matches but does not itself terminate/block the request.
+5. Open Traffic overview / sampled requests and collect benign evidence for CountedRequests; do not run abusive traffic to generate a screenshot.
+6. Evaluate legitimate-traffic false positives before suggesting any future change to Block, and document the approval process.
 
+## Expected outcome / result recording
 
+**Expected:** Frontend and backend Web ACL associations match design and backend count-only rule records matches without claiming to block them.
 
-## Validation checklist
+**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
 
-- [ ] Web ACL is attached to exactly the intended resources.
-- [ ] Sampled requests/counts show expected rule actions.
+## Risks and operational notes
 
-## Pitfalls / security
+Individual rule actions vary. A Count-only backend rule is not production blocking protection. WAF billing depends on ACL, rules and requests.
 
-WAF on CloudFront does not cover direct ALB requests. WAF can incur Web ACL/rule/request charges.
+## Screenshot evidence to capture
 
-## Required personal screenshots
+CloudFront/ALB associations, rule action Count and sampled match counts.
 
-**Capture after execution:** Web ACL scope, rules, association, Count/Block sampled requests.
+**Suggested path:** `static/images/5-workshop/5.7.4-01.png` (capture from real Console; do not create a fake screenshot).
 
-Use filenames like `static/images/5-workshop/5.7.4-01.png`. Do not upload credentials or customer data. Add a screenshot using `{{</* workshop-image src="images/5-workshop/5.7.4-01.png" alt="AWS WAF evidence" caption="Recorded from actual deployment" */>}}` **only after the file exists**.
+## Official reference
 
-**AWS documentation:** <https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html>
+<https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-rule-actions.html>
