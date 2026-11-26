@@ -1,42 +1,30 @@
 ---
-title: "Dự toán chi phí"
+title: "Chi phí của một môi trường BTB mẫu"
+menuTitle: "Dự toán chi phí"
 weight: 12
 chapter: false
 pre: "<b> 5.12. </b> "
 ---
 
-# 5.12. Dự toán và tối ưu chi phí
 
-Dùng **[AWS Pricing Calculator](https://calculator.aws/)** với Region và thông số runtime thật. **Không tự bịa bill tháng.** Ngưỡng AWS Budgets, chi phí AWS thực tế và dự toán Calculator là 3 dữ liệu khác nhau.
+Ảnh task definition chọn Linux/x86, 0,5 vCPU và 2 GB. Ví dụ tính cho Singapore, 1 task và 1 ALB chạy 730 giờ/tháng, giả định trung bình 1 LCU. Bảng dưới dùng giá niêm yết USD tra ngày 25/11/2026, chưa tính thuế, credit hay Free Tier. Số task, số giờ và LCU là giả định thực hành.
 
-## Các đầu vào cần đo
+| Khoản tính | Khối lượng × đơn giá | USD/tháng |
+|---|---|---:|
+| Fargate vCPU | 0.5 × 730 × 0.05056 | 18.4544 |
+| Fargate RAM | 2 × 730 × 0.00553 | 8.0738 |
+| ALB hours | 1 × 730 × 0.0252 | 18.3960 |
+| ALB LCU | 1 × 730 × 0.008 | 5.8400 |
 
-| Dịch vụ | Yếu tố tạo chi phí | Thực tế |
-|---|---|---|
-| ECS Fargate | số task, vCPU, RAM GiB, giờ chạy | TODO |
-| ALB | số giờ, LCU, lưu lượng | TODO |
-| ECR | dung lượng image, scanning, lifecycle | TODO |
-| S3 | GB/tháng, requests, versioning | TODO |
-| CloudFront | GB outbound theo vùng, requests, invalidation | TODO |
-| Route 53 + ACM | hosted zone, DNS queries, loại chứng chỉ | TODO |
-| Secrets Manager | số secret/tháng và API calls | TODO |
-| CloudWatch Logs/Metrics/Alarms | ingest, retention, custom metrics, alarms | TODO |
-| SNS | số notification | TODO |
-| CloudWatch RUM | sự kiện trình duyệt/retention | TODO |
-| Cognito Identity Pools | cơ chế cấp credential; đối chiếu khoản phí | TODO |
-| WAF | Web ACL, rule, managed groups, requests | TODO |
-| Bedrock | số token/giá model, cách inference, Region | TODO |
-| VPC | public IPv4, data egress, NAT/endpoints nếu thực có | TODO |
-| Budgets | chi phí budget/notification áp dụng | TODO |
-| Dịch vụ ngoài AWS | Supabase, Cloudinary, Vietmap, SePay, Gmail SMTP | TODO (riêng) |
+**Tạm tính Fargate + ALB: 50,76 USD/tháng.** Với đúng các giả định trên, lab 4 giờ có tạm tính khoảng 0,28 USD. Đây là hai hạng mục của mô hình; hóa đơn toàn hệ thống còn phụ thuộc các dịch vụ dưới đây. Ngân sách 200 USD ở bài 5.4.1 là mức để cảnh báo.
 
-## Hướng tối ưu
+## Hoàn thiện bảng dự toán cho buổi demo
 
-1. Dựa trên CPU/RAM ECS và ALB metrics trước khi giảm resource; nếu 1 task/1 AZ phải ghi giới hạn HA.
-2. Cache asset frontend phù hợp; xem CloudFront data transfer.
-3. Cấu hình retention log, lifecycle ECR và xóa version S3 có kiểm soát.
-4. Đọc sampled requests WAF trước khi chuyển rule BE từ Count sang Block.
-5. Theo dõi token Bedrock và sampling/ingest RUM; không mặc định miễn phí.
-6. Chụp/export Calculator có ngày, ghi assumptions và đối chiếu với Budgets thực tế.
+1. Trong AWS Pricing Calculator tạo estimate, chọn Singapore cho compute và LCU đo từ CloudWatch. Với ECS chạy nhiều task, nhân CPU/RAM với tổng task-hours. Ghi thêm thời gian rollout có hai revision chạy đồng thời.
+2. Thêm ECR (GB image), S3 (GB, request, version), CloudFront (dữ liệu theo khu vực người xem và request), Route 53 (hosted zone/query), WAF (số ACL, rule và request), Secrets Manager (secret và API call). Kiểm tra loại chứng chỉ ACM đang dùng.
+3. Thêm phí mạng theo kiến trúc lab: public IPv4, NAT theo giờ/GB hoặc interface endpoints theo AZ, data transfer. Với CloudWatch, ghi GB log ingest/retention, alarm và số event RUM. Thêm SNS delivery, EventBridge custom events/archive, SQS requests/DLQ và token theo đúng model Bedrock.
+4. Đối chiếu tổng Calculator với Cost Explorer bằng cùng khoảng thời gian, account và Region. Ghi chi phí dịch vụ ngoài AWS riêng. Lưu link chia sẻ/export cùng ngày và giả định sau khi nhập workload thực tế.
 
-**Bài nộp:** link/export Calculator, giả định, bảng từng dịch vụ và phân tích tối ưu. Chưa đủ input thì không đưa số tổng giả.
+**Tối ưu theo phép đo.** Tắt tài nguyên lab sau buổi thử, đo CPU/memory trước khi hạ kích thước task, giảm sampling RUM sau khi hoàn tất test, đặt retention cho log/archive. So đường ra cần cho Supabase/SMTP trước khi chọn NAT hoặc endpoint.
+
+[Amazon ECS price list · Singapore](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/current/ap-southeast-1/index.json) · [ELB price list · Singapore](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/current/ap-southeast-1/index.json) · [AWS Pricing Calculator](https://calculator.aws/)

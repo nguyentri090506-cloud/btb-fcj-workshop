@@ -1,50 +1,39 @@
 ---
-title: "Amazon ECR"
+title: "Push the Spring Boot image to Amazon ECR"
+menuTitle: "Amazon ECR"
 weight: 1
 chapter: false
 pre: "<b> 5.5.1. </b> "
 ---
 
-# 5.5.1. Amazon ECR
+1. **Find Elastic Container Registry in the AWS Console → open Private registry.**
 
-> **Source status, as reported by the BTB team (18 November 2026):** Used in current CI/CD.
+{{< btbfigure file="aws-ecr-step-1.webp" caption="Find Elastic Container Registry in the AWS Console → open Private registry." step="yes" >}}
 
-## Objective and actual role
+2. **Choose Repositories → Create repository.** Select Private, enter `generate-ui-be`, choose the tag setting and create the repository. Use a new tag for each immutable build.
 
-Private repository containing the Docker image consumed by ECS Fargate.
+{{< btbfigure file="aws-ecr-step-2-create-private-repository.webp" caption="Repository referenced by the task definition." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Select the repository → View push commands → Windows.** Open PowerShell in the backend Dockerfile directory. Use Docker, AWS CLI and AWS Tools for PowerShell with the same lab account. The commands follow the four pictured operations and use the commit SHA for the ECR tag.
 
-1. Open ECR → Private repositories; find the repository used by BTB backend and record actual name, Region, encryption setting and tag strategy.
-2. Inspect images and note the deployed immutable digest/tag, upload time and image size; never guess an existing version.
-3. Check GitHub Actions authentication, image build and push steps; use short-lived role credentials where configured.
-4. Open ECS task definition and compare the image URI/digest with ECR; confirm that the version ECS actually runs is the expected release.
-5. Review repository scanning and image lifecycle policy; coordinate pruning old images to avoid deleting a rollback target.
-6. Record evidence of successful image publication and ECS deployment from the production pipeline.
+{{< btbfigure file="aws-ecr-step-3-display-commands.webp" caption="Windows commands in View push commands." step="yes" >}}
 
-## Expected outcome / result recording
-
-**Expected:** Actual image digest referenced by the running task matches ECR image metadata.
-
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
-
-## Risks and operational notes
-
-A tag such as `latest` alone is insufficient release traceability; prefer immutable SHA/digest.
-
-## Screenshot evidence to capture
-
-Repository image list, digest and task definition image URI.
-
-**Suggested path:** `static/images/5-workshop/5.5.1-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Optional read-only command
 
 ```powershell
-# Illustrative only: replace placeholders and ensure AWS CLI auth is configured
-aws ecr describe-images --repository-name <ECR_REPOSITORY> --region <AWS_REGION>
+$region = "ap-southeast-1"
+$account = aws sts get-caller-identity --query Account --output text
+$registry = "$account.dkr.ecr.$region.amazonaws.com"
+$tag = git rev-parse --short HEAD
+(Get-ECRLoginCommand -Region $region).Password | docker login --username AWS --password-stdin $registry
+docker build --platform linux/amd64 -t generate-ui-be .
+docker tag generate-ui-be:latest "${registry}/generate-ui-be:${tag}"
+docker push "${registry}/generate-ui-be:${tag}"
+aws ecr describe-images --region $region --repository-name generate-ui-be --image-ids imageTag=$tag --query "imageDetails[0].imageDigest"
 ```
 
-## Official reference
 
-<https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html>
+**Verify.** Open Images and select the uploaded tag. Compare its digest with describe-images and record the URI and digest for the task definition.
+
+## References
+
+- [ECR private image push](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)

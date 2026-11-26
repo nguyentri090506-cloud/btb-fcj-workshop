@@ -1,46 +1,31 @@
 ---
-title: "Dọn tài nguyên và khắc phục lỗi"
+title: "Dọn tài nguyên lab theo thứ tự phụ thuộc"
+menuTitle: "Dọn tài nguyên và khắc phục lỗi"
 weight: 13
 chapter: false
 pre: "<b> 5.13. </b> "
 ---
 
-# 5.13. Dọn tài nguyên và xử lý lỗi
 
-## Không được xóa production để hoàn thành workshop
 
-**Không xóa/tắt hạ tầng production đang chạy chỉ để chụp Cleanup.** Phần này chỉ dành cho **tài nguyên lab riêng** khi được phép. Giữ nguyên VPC, ECS, ALB, Route 53, CloudFront, S3, ECR, WAF, Secrets Manager, IAM, Budgets, RUM, Cognito, Bedrock và monitoring chung của nhóm.
+Chỉ làm với tài nguyên riêng của buổi thực hành. Trước khi xóa, đối chiếu account, Region, tên/tag và các association. Lưu kết quả demo, số revision và số liệu chi phí cần báo cáo.
 
-## Thứ tự cleanup cho môi trường lab riêng
+## 1. Dừng nguồn phát sinh dữ liệu
 
-1. Lưu ảnh test đã che dữ liệu, ghi resource ID và chi phí cần đối chiếu.
-2. Tắt/xóa ECS service/task lab sau khi được duyệt; xóa listener/target group và ALB lab tương ứng.
-3. Gỡ WAF lab khỏi CloudFront, disable distribution và xóa khi AWS cho phép.
-4. Dọn object và version ở bucket **riêng của lab** rồi xóa bucket nếu không còn dùng.
-5. Xóa image/repository ECR lab và secret lab không còn tham chiếu (Secrets Manager có recovery window).
-6. Chỉ xóa IAM role, log group, SNS topic, alarm, RUM monitor/Cognito pool, record Route 53 test khi xác nhận không dùng chung.
-7. Kiểm tra phí còn lại, domain registration và subscription ngoài AWS; billing có độ trễ.
+Tắt trigger deploy của lab; gỡ RUM client khỏi bản FE lab. Disable rule EventBridge, gỡ target rồi xóa rule. Kiểm tra queue chính/DLQ và archive; sau khi xử lý hoặc lưu message demo cần thiết, xóa archive, custom bus và queue lab. Xóa alarm trước topic SNS và subscription.
 
-## Các lỗi thường gặp
+## 2. Gỡ đường vào và compute
 
-| Hiện tượng | Kiểm tra trước |
-|---|---|
-| Web 403/404 khi refresh route | CloudFront origin/OAC và SPA fallback |
-| API 502/503 | ALB target health, ECS port/SG, task logs |
-| ECS `CannotPullContainerError` | ECR URI, execution role, outbound network |
-| BE không kết nối Supabase | TLS/DNS, egress, secret, pool |
-| Bedrock AccessDenied | Region/model, task role, model profile |
-| WAF có match nhưng request vẫn qua | Rule có thể **Count**, không Block |
-| CloudWatch Alarm không gửi email | alarm action, SNS topic/subscription Confirmed |
-| RUM không nhận dữ liệu | FE code deploy, domain, Cognito role, browser telemetry |
-| SePay callback lỗi | HTTPS route, auth theo provider, idempotency, logs |
-| Gmail OTP không đến | SMTP/TLS/credentials, recipient, rate limit |
-| Hugo local lỗi | Hugo version/theme và shortcode `getJSON` cũ |
+Gỡ Alias FE/API của lab và xác nhận hostname nào dùng chung. Gỡ association WAF khỏi distribution/ALB, gỡ function association, disable CloudFront rồi đợi deployed trước khi xóa distribution và OAC riêng. Xóa function/ACL riêng sau khi hết association.
 
-## Checklist hoàn thiện
+ECS service → desired count 0 → đợi task dừng → xóa service và cluster lab. Xóa ALB (tắt deletion protection riêng cho ALB lab nếu đã bật), sau đó target group. Deregister task revision lab nếu không còn dùng. Xóa cert ACM sau khi hết attachment.
 
-- [ ] Mỗi dịch vụ có ảnh và resource ID đã đối chiếu.
-- [ ] Có kết quả test thật, kể cả lỗi chưa sửa.
-- [ ] Sơ đồ draw.io được nhóm kiểm tra và xuất ảnh có ngày.
-- [ ] Có Pricing Calculator và Live Demo.
-- [ ] GitHub không chứa secret hoặc PII Customer.
+## 3. Dọn lưu trữ, quyền và mạng
+
+Empty bucket lab, gồm version và delete marker nếu bật versioning, rồi xóa bucket FE/log riêng. Xóa image và repo ECR lab. Lên lịch xóa secret với recovery window. Xóa RUM monitor, identity pool, flow log delivery, log group và role/policy lab khi mọi producer đã dừng.
+
+Nếu lab tạo NAT, xóa NAT → chờ Deleted → release Elastic IP. Xóa endpoint riêng, kiểm tra ENI, rồi dọn security group, subnet, route table tùy chỉnh; detach/delete IGW, xóa VPC lab. Chỉ xóa public zone khi domain đã chuyển DNS hoặc hết dùng và đã dọn record ngoài NS/SOA.
+
+## 4. Kiểm tra sau buổi thực hành
+
+Kiểm tra cả Singapore và us-east-1. Đối chiếu ECS running tasks, ALB, NAT/IPv4, CloudFront, log và dữ liệu tích trữ trong S3/ECR. Sau khi billing cập nhật, xem Cost Explorer với bộ lọc service/date. Giữ budget cảnh báo nếu tiếp tục dùng tài khoản.

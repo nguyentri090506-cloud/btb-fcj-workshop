@@ -1,13 +1,14 @@
 ---
 title: "External Integrations"
+menuTitle: "External Integrations"
 weight: 9
 chapter: false
 pre: "<b> 5.9. </b> "
 ---
 
-# 5.9. External Integrations
 
-This phase documents the actual reported BTB resources. Read each service lab; fill out outcomes and screenshots from the real environment.
+
+Use these labs to verify each integration from BTB to its provider. The evidence includes backend configuration keys and related DNS/WAF screens. The provider dashboard steps are hands-on instructions.
 
 - [5.9.1. Supabase PostgreSQL & Authentication](5.9.1-supabase/) — External PostgreSQL database and reported authentication component for BTB.
 - [5.9.2. Cloudinary Media](5.9.2-cloudinary/) — Serves BTB product, content and avatar images independently of the S3 frontend build.

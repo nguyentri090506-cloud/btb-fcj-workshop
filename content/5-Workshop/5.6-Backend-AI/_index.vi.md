@@ -1,13 +1,14 @@
 ---
 title: "Triển khai Backend và AI"
+menuTitle: "Triển khai Backend và AI"
 weight: 6
 chapter: false
 pre: "<b> 5.6. </b> "
 ---
 
-# 5.6. Triển khai Backend và AI
 
-Giai đoạn này ghi cấu hình BTB theo báo cáo của nhóm. Xem từng bài lab, bổ sung kết quả và ảnh chụp resource thật.
+
+Chuẩn bị secret, log group ở 5.8.1 và chứng chỉ ALB ở 5.7.1. Kết quả cần kiểm tra là task chạy ổn định và target Healthy.
 
 - [5.6.1. AWS Secrets Manager](5.6.1-aws-secrets-manager/) — Lưu cấu hình nhạy cảm của BE: database, AI, webhook, mail.
 - [5.6.2. Application Load Balancer](5.6.2-application-load-balancer/) — Điểm vào API HTTPS, chuyển request về ECS target khỏe.

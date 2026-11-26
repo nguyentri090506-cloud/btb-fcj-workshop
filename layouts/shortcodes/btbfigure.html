@@ -1,0 +1,2 @@
+{{ $src := printf "images/btb-labs/%s" (.Get "file") | relURL }}
+<figure style="margin:1rem 0 1.6rem"><a href="{{ $src }}"><img src="{{ $src }}" alt="{{ .Get "caption" }}" loading="lazy" style="display:block;width:auto;max-width:100%;height:auto;margin:0;border:1px solid #cbd5e1"></a>{{ if not (.Get "step") }}<figcaption style="font-size:.92em;margin-top:.4rem">{{ .Get "caption" }}</figcaption>{{ end }}</figure>

@@ -1,51 +1,36 @@
 ---
-title: "Amazon Route 53"
+title: "Ủy quyền DNS từ Mắt Bão sang Route 53"
+menuTitle: "Amazon Route 53"
 weight: 3
 chapter: false
 pre: "<b> 5.7.3. </b> "
 ---
 
-# 5.7.3. Amazon Route 53
+1. **Chọn Route 53 → Hosted zones → Create hosted zone.** Nhập domain đã đăng ký, chọn Public hosted zone → Create. Ghi đủ bốn nameserver trong NS record.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** DNS đã cấu hình.
+{{< btbfigure file="aws-route-53-step-1-create-hosted-zone.webp" caption="Public hosted zone cho domain của nhóm." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Mở Mắt Bão → Quản trị tên miền → Name Server.** Nếu chuyển domain đang dùng, sao chép các record MX/TXT/ACM cần thiết sang zone mới trước. Chọn Sử dụng Name Server tùy chỉnh, nhập bốn giá trị của zone và lưu.
 
-Bản ghi DNS trỏ hostname frontend về CloudFront và API về ALB.
+{{< btbfigure file="aws-route-53-step-2-setup-route.webp" caption="Màn hình cấu hình nameserver tại Mắt Bão." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Quay lại Route 53 → Create record.** Tạo A Alias cho apex và www tới CloudFront. Nếu distribution bật IPv6, thêm AAAA Alias. Tạo A Alias cho api tới ALB Singapore. Hostname origin API phải phân giải tới ALB.
 
-1. Mở Route 53 → Hosted zones, xác định public hosted zone của domain BTB.
-2. Ghi alias/CNAME của tên miền FE và xác nhận trỏ đúng CloudFront distribution.
-3. Ghi alias của API hostname và xác nhận trỏ đến ALB DNS name.
-4. Kiểm tra TTL và bản ghi DNS validation cho ACM đang được duy trì.
-5. Dùng `Resolve-DnsName` hoặc `nslookup` với cả hai domain thực tế rồi đối chiếu đích DNS.
-6. Gọi HTTPS từng domain, ghi frontend/API hoạt động theo cấu hình.
+4. **Đối chiếu DNS và HTTPS.** Thay YOUR_LAB_DOMAIN bằng tên miền của lab.
 
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** DNS FE/API resolve đúng và HTTPS trả đúng dịch vụ.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Tên miền/hosted zone phải do nhóm kiểm chứng; không lấy tên ví dụ ghi như production.
-
-## Ảnh minh chứng cần chụp
-
-Record DNS, đích resolve và ảnh HTTPS trình duyệt.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.7.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
-
-## Lệnh kiểm tra tham khảo (read-only)
 
 ```powershell
-# Windows PowerShell — replace with actual public names
-Resolve-DnsName <FRONTEND_DOMAIN>
-Resolve-DnsName <API_DOMAIN>
+$domain = "YOUR_LAB_DOMAIN"
+Resolve-DnsName $domain -Type NS
+Resolve-DnsName $domain -Type A
+Resolve-DnsName "api.$domain" -Type A
+curl.exe -I "https://$domain/"
+curl.exe -i "https://$domain/api/health"
 ```
+
+
+**Kiểm tra kết quả.** NS trả về đúng delegation, trình duyệt mở FE qua HTTPS và /api/health trên hostname FE phản hồi từ backend.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html>
+- [Route 53 delegation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/MigratingDNS.html)

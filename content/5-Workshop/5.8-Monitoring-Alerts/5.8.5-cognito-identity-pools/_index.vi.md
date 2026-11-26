@@ -1,43 +1,37 @@
 ---
-title: "Amazon Cognito Identity Pools"
+title: "Cấp credential tạm cho trình duyệt gửi RUM"
+menuTitle: "Amazon Cognito Identity Pools"
 weight: 5
 chapter: false
 pre: "<b> 5.8.5. </b> "
 ---
 
-# 5.8.5. Amazon Cognito Identity Pools
+1. **Mở Cognito → Identity pools → pool mà RUM sử dụng → User access.** Kiểm tra Guest access Active, rồi bấm tên guest role. Kiểm tra trust policy giới hạn aud đúng pool, amr unauthenticated và principal cognito-identity.amazonaws.com.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã tạo Identity Pool cùng RUM.
+{{< btbfigure file="aws-cognito-identity-pools-step-1-guest-access.webp" caption="Guest access và guest role." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Mở IAM role → Permissions → putRumEvents → Edit → JSON.** Ảnh cho phép ghi vào mọi monitor của account. Mẫu lab dưới ảnh thu hẹp quyền xuống monitor BTB. Thay ACCOUNT_ID và tên monitor, rồi Review → Save.
 
-Cấp AWS credential tạm cho RUM client của trình duyệt theo cấu hình hiện tại.
+{{< btbfigure file="aws-cognito-identity-pools-step-2-policy-check.webp" caption="JSON cho phép rum:PutRumEvents." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Mở Cognito → Identity pools, tìm pool được RUM app monitor sử dụng (khác User Pool làm login BTB).
-2. Kiểm tra cấu hình authenticated/unauthenticated identity thật và role IAM tương ứng.
-3. Đối chiếu policy role unauth chỉ đủ cho RUM ingest (ví dụ `rum:PutRumEvents` trên monitor phù hợp), không cấp admin access.
-4. Kiểm tra frontend đã deploy dùng đúng pool ID/Region, không nhúng access key dài hạn.
-5. Quan sát request telemetry/lỗi AccessDenied trong DevTools và đối chiếu với dữ liệu RUM.
-6. Ghi Cognito Identity Pools là **quyền cho RUM**, không đồng nhất với đăng nhập/OTP Customer qua Supabase/BTB.
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SendFrontendTelemetry",
+      "Effect": "Allow",
+      "Action": "rum:PutRumEvents",
+      "Resource": "arn:aws:rum:ap-southeast-1:ACCOUNT_ID:appmonitor/btb-frontend-performance"
+    }
+  ]
+}
+```
 
-## Kết quả mong đợi và ghi nhận thực tế
 
-**Mong đợi:** Browser lấy credential tạm và gửi được event đến monitor (chưa test thì ghi pending).
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Identity Pools không chứng minh dự án dùng Cognito User Pools cho Customer auth.
-
-## Ảnh minh chứng cần chụp
-
-Pool ID/Region, policy role IAM giới hạn quyền và tích hợp RUM.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.8.5-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Gắn pool ID vào client ở 5.8.4, mở phiên trình duyệt mới và kiểm tra PutRumEvents thành công. Guest role này chỉ cấp quyền gửi telemetry.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started-authorization.html>
+- [Cognito identity pool roles](https://docs.aws.amazon.com/cognito/latest/developerguide/iam-roles.html)

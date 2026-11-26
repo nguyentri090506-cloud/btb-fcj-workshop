@@ -1,43 +1,21 @@
 ---
-title: "Cloudinary lưu trữ ảnh"
+title: "Kiểm tra ảnh sản phẩm qua Cloudinary"
+menuTitle: "Cloudinary lưu trữ ảnh"
 weight: 2
 chapter: false
 pre: "<b> 5.9.2. </b> "
 ---
 
-# 5.9.2. Cloudinary lưu trữ ảnh
+1. **Mở Cloudinary Console → product environment của lab → Media Library.** Tạo thư mục lab, chọn Upload rồi tải một ảnh PNG/JPEG thử.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã dùng để lưu ảnh/media, bao gồm avatar.
+2. **Mở asset vừa tạo → Asset details.** Ghi public_id và secure_url. Giữ credential ký upload ở backend trong Secrets Manager.
 
-## Mục tiêu và vai trò trong hệ thống
+3. **Trong BTB, mở màn quản lý catalog → SKU thử.** Gán ảnh và lưu. Mở storefront, kiểm tra thẻ sản phẩm và trang chi tiết của cùng SKU.
 
-Lưu ảnh sản phẩm, nội dung và avatar BTB; độc lập với S3 frontend.
+4. **Mở DevTools → Network → Img → refresh.** Chọn request ảnh, đối chiếu hostname Cloudinary, Content-Type và kích thước truyền.
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
-
-1. Mở Cloudinary dashboard/folder, ghi cấu trúc ảnh; chỉ lưu URL/public_id được phép, không lộ API secret.
-2. Trên web React production, kiểm tra ảnh card sản phẩm/brand/avatar tải đúng từ Cloudinary CDN.
-3. Nếu test upload, dùng tài khoản/ảnh thử và luồng upload được backend ký hoặc proxy, không bật upload unsigned tự do.
-4. Kiểm tra định dạng, dung lượng ảnh và quyền sở hữu khi ảnh là dữ liệu Customer.
-5. Xác minh fallback ảnh hỏng và cách lưu public_id/secure_url nhất quán trong backend.
-6. Giải thích S3 là frontend static build, Cloudinary là ảnh/media trong sơ đồ.
-
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** Ảnh hiển thị đúng; upload test có kiểm quyền; API secret không bị lộ.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Tên folder/public_id cần lấy thật; không tự đặt làm như production.
-
-## Ảnh minh chứng cần chụp
-
-URL ảnh trên web, metadata asset và xác nhận upload đã che dữ liệu.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.9.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Ảnh tải được khi mở lại trang. Nếu URL trả 404, đối chiếu public_id và chữ hoa/thường. Nếu URL đúng nhưng thẻ trống, kiểm tra dữ liệu API và img src. Gỡ liên kết ở SKU trước khi xóa ảnh lab.
 
 ## Tài liệu tham khảo
 
-<https://cloudinary.com/documentation/image_upload_api_reference>
+- [Cloudinary Upload API](https://cloudinary.com/documentation/image_upload_api_reference)

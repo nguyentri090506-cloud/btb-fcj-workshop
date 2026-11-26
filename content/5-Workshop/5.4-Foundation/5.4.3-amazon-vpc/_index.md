@@ -1,43 +1,73 @@
 ---
-title: "Amazon VPC"
+title: "Network for the ALB and Fargate tasks"
+menuTitle: "Amazon VPC"
 weight: 3
 chapter: false
 pre: "<b> 5.4.3. </b> "
 ---
 
-# 5.4.3. Amazon VPC
+Prepare two Singapore AZs for the ALB and a network path to Fargate tasks on port 8080.
 
-> **Source status, as reported by the BTB team (18 November 2026):** VPC, routes and IGW configured; exact subnet placement/egress to external providers must be recorded.
+## VPC and subnets
 
-## Objective and actual role
+1. **Search for VPC in the AWS Console.**
 
-Networking for public ALB and backend ECS tasks, including subnets, routes and Internet Gateway.
+{{< btbfigure file="aws-vpc-step-1.webp" caption="Search for VPC in the AWS Console." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+2. **Choose Your VPCs → Create VPC.**
 
-1. Open VPC → Your VPCs, select the existing BTB VPC and record the actual Region, VPC ID and CIDR; do not copy example CIDRs from a diagram.
-2. Use the VPC resource map and Subnets view to record actual Availability Zones, public/private mapping and route-table associations.
-3. Check the Internet Gateway attachment and public routes; a public ALB normally requires internet-reachable subnets with appropriate ingress rules.
-4. Verify ECS tasks' real network placement and outbound connectivity toward Supabase, Cloudinary, Vietmap, SePay, Bedrock and SMTP; do not assume an Internet Gateway alone gives private tasks internet access.
-5. Check the ALB security group allows intended HTTPS ingress and the ECS security group permits the backend application port only from ALB security group.
-6. Capture the VPC map, route tables, security groups and ECS task network settings; mark private-route design as unresolved if not verified.
+{{< btbfigure file="aws-vpc-step-2-create-vpc.webp" caption="Choose Your VPCs → Create VPC." step="yes" >}}
 
-## Expected outcome / result recording
+3. **Choose VPC only.** Enter the lab name and IPv4 CIDR `10.0.0.0/16`, then choose Create VPC.
 
-**Expected:** ALB health checks work, ECS can reach required third parties, and backend port is not directly internet-accessible.
+{{< btbfigure file="aws-vpc-step-3-setup-vpc.webp" caption="VPC creation form." step="yes" >}}
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+4. **Select the VPC → Actions → Edit VPC settings.** Enable DNS resolution and DNS hostnames and save.
 
-## Risks and operational notes
+{{< btbfigure file="aws-vpc-step-4-enable-dns.webp" caption="DNS options in VPC settings." step="yes" >}}
 
-Public subnet/private subnet and number of Availability Zones must reflect current AWS Console. NAT Gateway / VPC endpoints are not presumed deployed.
+5. **Open Subnets → Create subnet.** Select the VPC you created and choose an Availability Zone for the first subnet.
 
-## Screenshot evidence to capture
+{{< btbfigure file="aws-vpc-step-5-create-subnet.webp" caption="Open Subnets → Create subnet." step="yes" >}}
 
-VPC resource map, subnet routes, SG inbound/outbound, ECS task networking.
+6. **Enter each subnet name and CIDR.** The capture shows private A. Add the remaining subnets to the same VPC. Example lab ranges:
+   - Public A/B — `10.0.0.0/24`, `10.0.1.0/24` in two AZs
+   - Private A/B — `10.0.128.0/20`, `10.0.144.0/20` in two AZs
 
-**Suggested path:** `static/images/5-workshop/5.4.3-01.png` (capture from real Console; do not create a fake screenshot).
+{{< btbfigure file="aws-vpc-step-5-setup-subnet.webp" caption="First private subnet and its AZ." step="yes" >}}
 
-## Official reference
+## Internet gateway and route tables
 
-<https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html>
+7. **Open Internet gateways → Create internet gateway.**
+
+{{< btbfigure file="aws-vpc-step-6-create-internet-gateways.webp" caption="Open Internet gateways → Create internet gateway." step="yes" >}}
+
+8. **Enter its Name tag → Create internet gateway.**
+
+{{< btbfigure file="aws-vpc-step-6-name-internet-gateways.webp" caption="Enter its Name tag → Create internet gateway." step="yes" >}}
+
+9. **Choose Actions → Attach to VPC.** Select your VPC and attach the gateway.
+
+{{< btbfigure file="aws-vpc-step-7-attach.webp" caption="Attach the gateway to the lab VPC." step="yes" >}}
+
+10. **Open Route tables → Create route table.** Name the public table, select the lab VPC and create it.
+
+{{< btbfigure file="aws-vpc-step-8-create-route-table.webp" caption="Open Route tables → Create route table." step="yes" >}}
+
+11. **Choose Routes → Edit routes → Add route.** Set destination `0.0.0.0/0` and select your internet gateway. Save changes, then associate both public subnets.
+
+{{< btbfigure file="aws-vpc-step-9-edit-routes.webp" caption="Public default route points to the internet gateway." step="yes" >}}
+
+12. **Provide egress for private tasks.** For the NAT option create a public NAT gateway with an Elastic IP in a public subnet, wait for Available, then route the **private table's** default route to NAT. If using endpoints, also check connectivity to Supabase and SMTP. NAT incurs hourly and data charges.
+
+13. **Open Security groups → Create security group.** Create both groups in the VPC.
+    - ALB-SG — inbound HTTPS 443 from intended sources, outbound TCP 8080 to TASK-SG
+    - TASK-SG — inbound TCP 8080 from ALB-SG; allow egress to backend dependencies
+
+{{< btbfigure file="aws-vpc-step-10-create-security-groups.webp" caption="Security group creation in the VPC." step="yes" >}}
+
+**Verify.** Select each subnet → Route table and verify its routes and association. In the ECS lab the target should become Healthy when the ALB checks port 8080.
+
+## References
+
+- [VPC routing](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)

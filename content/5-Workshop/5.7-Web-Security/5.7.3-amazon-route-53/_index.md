@@ -1,51 +1,36 @@
 ---
-title: "Amazon Route 53"
+title: "Delegate DNS from Mắt Bão to Route 53"
+menuTitle: "Amazon Route 53"
 weight: 3
 chapter: false
 pre: "<b> 5.7.3. </b> "
 ---
 
-# 5.7.3. Amazon Route 53
+1. **Choose Route 53 → Hosted zones → Create hosted zone.** Enter your registered domain, choose Public hosted zone and create it. Copy all four name servers from its NS record.
 
-> **Source status, as reported by the BTB team (18 November 2026):** DNS configured.
+{{< btbfigure file="aws-route-53-step-1-create-hosted-zone.webp" caption="Public hosted zone for the team domain." step="yes" >}}
 
-## Objective and actual role
+2. **Open Mắt Bão → Domain management → Name Server.** For an existing domain copy the required MX/TXT/ACM records into the new zone first. Select custom name servers, enter all four zone values and save.
 
-DNS records direct frontend and API hostnames to CloudFront and ALB.
+{{< btbfigure file="aws-route-53-step-2-setup-route.webp" caption="Name server configuration at Mắt Bão." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Return to Route 53 → Create record.** Create apex and www A aliases to CloudFront. Add AAAA aliases if IPv6 is enabled. Create an api A alias to the Singapore ALB. The API origin hostname must resolve to the ALB.
 
-1. Open Route 53 → Hosted zones; identify the actual public zone for the BTB domain.
-2. Record the frontend hostname's alias/CNAME target and ensure it points to CloudFront distribution domain as configured.
-3. Record the API hostname's alias target and ensure it points to the Application Load Balancer DNS name.
-4. Check TTL values if used and verify DNS validation records required by ACM are present and maintained.
-5. Use `Resolve-DnsName` or `nslookup` on both live names; compare actual answers to intended service targets.
-6. Test HTTPS responses to both hostnames and document the resulting frontend/API behavior.
+4. **Verify DNS and HTTPS.** Replace YOUR_LAB_DOMAIN with the lab domain.
 
-## Expected outcome / result recording
-
-**Expected:** DNS for FE and API resolves correctly and HTTPS serves the intended service.
-
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
-
-## Risks and operational notes
-
-DNS names, hosted zones and domains are placeholders until the team supplies real verified values.
-
-## Screenshot evidence to capture
-
-Hosted zone records, resolved targets and browser HTTPS checks.
-
-**Suggested path:** `static/images/5-workshop/5.7.3-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Optional read-only command
 
 ```powershell
-# Windows PowerShell — replace with actual public names
-Resolve-DnsName <FRONTEND_DOMAIN>
-Resolve-DnsName <API_DOMAIN>
+$domain = "YOUR_LAB_DOMAIN"
+Resolve-DnsName $domain -Type NS
+Resolve-DnsName $domain -Type A
+Resolve-DnsName "api.$domain" -Type A
+curl.exe -I "https://$domain/"
+curl.exe -i "https://$domain/api/health"
 ```
 
-## Official reference
 
-<https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html>
+**Verify.** Verify the expected delegation, valid frontend HTTPS and a backend response for /api/health on the frontend hostname.
+
+## References
+
+- [Route 53 delegation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/MigratingDNS.html)

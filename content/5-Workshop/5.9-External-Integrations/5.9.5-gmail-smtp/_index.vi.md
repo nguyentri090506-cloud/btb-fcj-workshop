@@ -1,43 +1,23 @@
 ---
-title: "Gmail SMTP gửi OTP hệ thống"
+title: "Gửi OTP thử qua Gmail SMTP"
+menuTitle: "Gmail SMTP gửi OTP hệ thống"
 weight: 5
 chapter: false
 pre: "<b> 5.9.5. </b> "
 ---
 
-# 5.9.5. Gmail SMTP gửi OTP hệ thống
+1. **Mở tài khoản Gmail lab được phép gửi mail.** Nếu dùng App Password và chính sách cho phép, bật 2-Step Verification rồi tạo App Password. Với Workspace dùng cơ chế xác thực được quản trị viên cho phép.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Nhóm báo dùng Gmail SMTP; cần test OTP thật, tách với email cảnh báo SNS.
+2. **Mở secret backend và cấu hình Spring Mail.** Đối với STARTTLS đặt các trường sau.
+   - Host — smtp.gmail.com
+   - Port — 587
+   - SMTP auth và STARTTLS — bật
+   - Username và credential — inject vào ECS qua ValueFrom theo tên biến của ứng dụng
 
-## Mục tiêu và vai trò trong hệ thống
+3. **Deploy task mới và mở luồng kích hoạt hoặc đặt lại mật khẩu trên BTB.** Dùng tài khoản demo và email nhận riêng. Ghi thời điểm gửi, mở Inbox/Spam rồi nhập mã trong ứng dụng.
 
-Gửi email hệ thống BTB như OTP kích hoạt và đặt lại mật khẩu.
-
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
-
-1. Kiểm tra SMTP host, port, STARTTLS, email người gửi và nơi lấy credential trong backend, không in password/app password.
-2. Đảm bảo secret SMTP đặt ở Secrets Manager hoặc nơi được phê duyệt, ECS task lấy an toàn.
-3. Dùng Gmail test, thực hiện flow thực tế: Admin duyệt → gửi OTP → Customer nhập OTP → kích hoạt/đặt lại password theo code hiện tại.
-4. Xác nhận email đến, OTP một lần/hết hạn, rate limit và log backend không ghi OTP thô.
-5. Test OTP sai/hết hạn bằng tài khoản thử để xác nhận bị từ chối và không lộ thông tin.
-6. Phân biệt Gmail SMTP gửi OTP ứng dụng với SNS gửi email CloudWatch Alarm.
-
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** Inbox test nhận OTP đúng luồng, OTP sai/hết hạn bị từ chối và bí mật không bị lộ.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Không đưa OTP thật, mật khẩu Gmail hoặc SMTP credential vào GitHub public.
-
-## Ảnh minh chứng cần chụp
-
-Ảnh mail OTP test đã che, kết quả OTP và bảo mật credential.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.9.5-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Mã dùng được trong thời hạn và được xử lý theo quy tắc dùng một lần của ứng dụng. Nếu authentication failed, kiểm tra credential. Với timeout, kiểm tra egress tới cổng SMTP. Che OTP khi lưu ảnh demo.
 
 ## Tài liệu tham khảo
 
-<https://support.google.com/accounts/answer/185833>
+- [Google app passwords](https://support.google.com/accounts/answer/185833)

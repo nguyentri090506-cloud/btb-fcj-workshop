@@ -1,43 +1,48 @@
 ---
-title: "CloudWatch RUM"
+title: "Thu telemetry từ React bằng CloudWatch RUM"
+menuTitle: "CloudWatch RUM"
 weight: 4
 chapter: false
 pre: "<b> 5.8.4. </b> "
 ---
 
-# 5.8.4. CloudWatch RUM
+1. **Mở CloudWatch → RUM → Add app monitor.** Chọn các trường sau.
+   - Platform — Web
+   - App monitor name — `btb-frontend-performance`
+   - Domains — các hostname FE thực sự dùng, ví dụ apex và www
+   - Authorization — chọn Cognito Identity Pool và hoàn tất bước guest role ở 5.8.5
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã tạo monitor, thêm code FE; còn phải xác nhận có dữ liệu thực tế.
+{{< btbfigure file="aws-cloudwatch-rum-step-1-add-app-monitor.webp" caption="Tên app monitor, platform Web và domain list." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Mở Code snippet → TypeScript.** Trong repo FE chạy `npm install aws-rum-web`. Đặt code dưới đây trong module khởi tạo một lần trước khi render React. Thay APP_MONITOR_UUID và IDENTITY_POOL_UUID bằng ID của lab.
 
-Theo dõi hiệu năng và lỗi JavaScript của frontend React từ trình duyệt.
+{{< btbfigure file="aws-cloudwatch-rum-step-2.webp" caption="Hướng dẫn tích hợp TypeScript từ monitor." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
 
-1. Vào CloudWatch → RUM/Application Signals, xác định app monitor production, Region và domain được theo dõi.
-2. Kiểm tra monitor: origin/domain hợp lệ, loại telemetry, sample rate và cấu hình lưu dữ liệu.
-3. Kiểm tra bản frontend React đã deploy thật có khởi tạo RUM client/snippet, không chỉ ở branch local.
-4. Đối chiếu Cognito Identity Pool SDK dùng, mở DevTools Network/Console tìm request telemetry bị chặn hoặc lỗi CORS.
-5. Truy cập website thật theo policy consent/privacy, chuyển một số trang không nhạy cảm rồi kiểm tra RUM page views/performance/errors.
-6. Nếu chưa có dữ liệu, ghi `Chưa xác minh`, timestamp kiểm tra và nguyên nhân nghi ngờ; không ghi chạy thành công chỉ vì monitor đã tạo.
+```typescript
+import { AwsRum, type AwsRumConfig } from 'aws-rum-web';
 
-## Kết quả mong đợi và ghi nhận thực tế
+try {
+  const config: AwsRumConfig = {
+    sessionSampleRate: 1,
+    identityPoolId: 'ap-southeast-1:IDENTITY_POOL_UUID',
+    endpoint: 'https://dataplane.rum.ap-southeast-1.amazonaws.com',
+    telemetries: ['performance', 'errors', 'http'],
+    allowCookies: true,
+    enableXRay: false,
+    signing: true,
+  };
+  new AwsRum('APP_MONITOR_UUID', '1.0.0', 'ap-southeast-1', config);
+} catch {
+  // Telemetry initialization must not prevent React from starting.
+}
+```
 
-**Mong đợi:** RUM có page views/errors từ domain thật; chưa thấy thì để pending.
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+3. **Build lại frontend → upload S3 → làm mới cache CloudFront.** Mở website trong tab mới trên hostname đã khai báo. Ảnh dùng sampling 100% và cookie; áp dụng cơ chế đồng ý của website khi sử dụng thực tế.
 
-## Lưu ý vận hành và rủi ro
-
-RUM có thể thu URL/metadata trình duyệt; kiểm tra chính sách dữ liệu cá nhân và consent.
-
-## Ảnh minh chứng cần chụp
-
-App monitor, vị trí SDK trong FE, request đã che dữ liệu và RUM dashboard.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.8.4-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** DevTools → Network: lọc dataplane.rum và xem status. Trong RUM → monitor, chọn time range của lần test và tìm page view. Với 403 kiểm tra guest role và signing. Note nhóm ghi đã thêm code, còn ingestion production cần test.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html>
+- [CloudWatch RUM setup](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html)

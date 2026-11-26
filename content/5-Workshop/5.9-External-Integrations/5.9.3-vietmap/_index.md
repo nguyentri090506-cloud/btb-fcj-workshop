@@ -1,43 +1,19 @@
 ---
-title: "Vietmap Maps & Location"
+title: "Verify address search and coordinates with Vietmap"
+menuTitle: "Vietmap Maps & Location"
 weight: 3
 chapter: false
 pre: "<b> 5.9.3. </b> "
 ---
 
-# 5.9.3. Vietmap Maps & Location
+1. **Choose two public places as the demo warehouse and destination.** In the lab Vietmap project check access to place search/routing. Keep the server key in the backend secret and configure suitable domain restrictions on any frontend SDK key.
 
-> **Source status, as reported by the BTB team (18 November 2026):** External provider listed; exact production API paths/keys must be verified.
+2. **Open the BTB delivery address form.** Enter the first place, select a suggestion and compare its ward/province, coordinates and marker.
 
-## Objective and actual role
+3. **Select and save the second place.** If the UI supports routing record distance, unit and ETA source. Try an unmatched input and edit the address again.
 
-Map, address lookup and distance display for BTB deliveries.
+**Verify.** The marker matches the selected location. For a misplaced marker check longitude/latitude order against the API. For 403 check access/key restrictions; for 429 check quota.
 
-## Lab: inspect, document and verify the existing production setup
+## References
 
-1. Find the deployed Customer/Delivery Staff screens that render Vietmap and confirm the map tiles/markers load over HTTPS.
-2. Verify configured API keys and allowed origins/restrictions without exposing them publicly in screenshots.
-3. Use a test delivery destination and inspect address search/geocoding and displayed route/distance results.
-4. Describe the current BTB demo business assumption: one warehouse, multiple order packages/delivery points, and illustrative ETA based on 40 km/h, not guaranteed road time.
-5. Check how the frontend/backend handles Vietmap timeout, quota errors and denied requests; document fallback text rather than silent failures.
-6. Capture anonymized map evidence and avoid displaying real Customer street addresses.
-
-## Expected outcome / result recording
-
-**Expected:** Map, location and distance feature produces test-only results consistent with documented demo assumptions.
-
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
-
-## Risks and operational notes
-
-ETA is illustrative; it is not a live GPS, traffic-aware ETA or a guarantee.
-
-## Screenshot evidence to capture
-
-Test route and location screen with anonymized destinations.
-
-**Suggested path:** `static/images/5-workshop/5.9.3-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://maps.vietmap.vn/>
+- [Vietmap Maps API](https://maps.vietmap.vn/docs/)

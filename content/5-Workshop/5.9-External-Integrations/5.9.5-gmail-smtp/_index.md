@@ -1,43 +1,23 @@
 ---
-title: "Gmail SMTP for System OTP"
+title: "Send a test OTP through Gmail SMTP"
+menuTitle: "Gmail SMTP for System OTP"
 weight: 5
 chapter: false
 pre: "<b> 5.9.5. </b> "
 ---
 
-# 5.9.5. Gmail SMTP for System OTP
+1. **Open the lab Gmail account authorized to send mail.** If policy allows app passwords, enable 2-Step Verification and generate an app password. In Workspace use the administrator-approved authentication method.
 
-> **Source status, as reported by the BTB team (18 November 2026):** External mail service reported; actual delivered OTP must be tested separately from SNS alert email.
+2. **Open the backend secret and configure Spring Mail.** Use the following for STARTTLS.
+   - Host — smtp.gmail.com
+   - Port — 587
+   - SMTP auth and STARTTLS — enabled
+   - Username and credential — inject with ECS ValueFrom using the application variable names
 
-## Objective and actual role
+3. **Deploy fresh tasks and open activation or password reset in BTB.** Use a demo account and a separate recipient mailbox. Record the send time, check inbox/spam and enter the code in the app.
 
-Sends selected BTB system emails, particularly onboarding or password-reset OTPs.
+**Verify.** The code works within its validity period and follows the application's single-use rules. For authentication failure check credentials. For timeout check outbound SMTP connectivity. Mask the OTP when capturing evidence.
 
-## Lab: inspect, document and verify the existing production setup
+## References
 
-1. Inspect backend mail settings (SMTP host, port, STARTTLS, sender address and credential sourcing) without printing the SMTP password or app password.
-2. Verify the required secret is stored in Secrets Manager or another approved secret store and injected into the ECS task securely.
-3. Using a test-only Gmail recipient, trigger the real BTB onboarding/reset flow: Admin approval → OTP sent → customer enters valid OTP → password activation/reset, as implemented.
-4. Verify delivered message metadata, expiration/one-time behavior, rate limiting and non-disclosure of OTP in backend logs.
-5. Test an invalid/expired OTP to confirm backend rejection and safe error responses; do not use production Customer records.
-6. Document Gmail SMTP separately from AWS SNS: SNS sends CloudWatch alarms, SMTP sends application OTP.
-
-## Expected outcome / result recording
-
-**Expected:** Test inbox receives the authorized OTP and invalid/expired OTP fails as designed; secrets remain hidden.
-
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
-
-## Risks and operational notes
-
-No real OTP, Gmail password or SMTP access credential belongs in a public workshop repository.
-
-## Screenshot evidence to capture
-
-Redacted successful test email, OTP test outcome, no credential exposure.
-
-**Suggested path:** `static/images/5-workshop/5.9.5-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://support.google.com/accounts/answer/185833>
+- [Google app passwords](https://support.google.com/accounts/answer/185833)

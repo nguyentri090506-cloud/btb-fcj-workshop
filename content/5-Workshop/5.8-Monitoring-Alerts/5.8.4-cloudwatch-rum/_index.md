@@ -1,43 +1,48 @@
 ---
-title: "CloudWatch RUM"
+title: "Collect React telemetry with CloudWatch RUM"
+menuTitle: "CloudWatch RUM"
 weight: 4
 chapter: false
 pre: "<b> 5.8.4. </b> "
 ---
 
-# 5.8.4. CloudWatch RUM
+1. **Open CloudWatch → RUM → Add app monitor.** Enter the following settings.
+   - Platform — Web
+   - App monitor name — `btb-frontend-performance`
+   - Domains — the actual frontend hostnames, such as the apex and www
+   - Authorization — select a Cognito Identity Pool and complete the guest role in 5.8.5
 
-> **Source status, as reported by the BTB team (18 November 2026):** App monitor created and FE code added; ingestion of actual browser data remains unverified.
+{{< btbfigure file="aws-cloudwatch-rum-step-1-add-app-monitor.webp" caption="App monitor name, web platform and domain list." step="yes" >}}
 
-## Objective and actual role
+2. **Open Code snippet → TypeScript.** In the frontend repo run `npm install aws-rum-web`. Place the code below in a startup module that runs once before React renders. Replace APP_MONITOR_UUID and IDENTITY_POOL_UUID with the lab IDs.
 
-Browser-side monitoring for React performance and JavaScript errors.
+{{< btbfigure file="aws-cloudwatch-rum-step-2.webp" caption="Monitor-generated TypeScript installation instructions." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
 
-1. Open CloudWatch → Application Signals / RUM (console label may vary) and identify the production app monitor, its Region and monitored domain.
-2. Inspect the app monitor configuration: included origins/domains, collected telemetry types, sample rate and any allowed data storage settings.
-3. Inspect React's deployed frontend build to confirm the RUM client snippet/SDK initializes in production, not just in a local branch.
-4. Check Cognito Identity Pool credentials used by the RUM SDK and inspect browser DevTools Network/Console for blocked telemetry requests or CORS errors.
-5. Visit the live frontend with consent/privacy settings respected, navigate a few non-sensitive pages, then inspect RUM app monitor for page views/performance/errors.
-6. If no new data appears, record `Pending verification`, the investigated timestamp and potential causes; do not claim RUM success based only on creating a monitor.
+```typescript
+import { AwsRum, type AwsRumConfig } from 'aws-rum-web';
 
-## Expected outcome / result recording
+try {
+  const config: AwsRumConfig = {
+    sessionSampleRate: 1,
+    identityPoolId: 'ap-southeast-1:IDENTITY_POOL_UUID',
+    endpoint: 'https://dataplane.rum.ap-southeast-1.amazonaws.com',
+    telemetries: ['performance', 'errors', 'http'],
+    allowCookies: true,
+    enableXRay: false,
+    signing: true,
+  };
+  new AwsRum('APP_MONITOR_UUID', '1.0.0', 'ap-southeast-1', config);
+} catch {
+  // Telemetry initialization must not prevent React from starting.
+}
+```
 
-**Expected:** RUM console shows recent page views/errors from the live domain, otherwise the check remains pending.
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+3. **Rebuild the frontend → upload to S3 → refresh the CloudFront cache.** Open a new tab on a configured hostname. The capture uses 100% sampling and cookies. Apply the website's consent requirements in use.
 
-## Risks and operational notes
+**Verify.** In DevTools → Network filter for dataplane.rum and inspect its status. In RUM → monitor select the test time range and look for a page view. For 403 check guest role and signing. The note reports client integration; production ingestion still needs testing.
 
-RUM frontend SDK may capture URLs/metadata; avoid leaking personal information and review privacy/consent settings.
+## References
 
-## Screenshot evidence to capture
-
-App monitor settings, FE SDK code location, sanitized network requests, RUM dashboard.
-
-**Suggested path:** `static/images/5-workshop/5.8.4-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html>
+- [CloudWatch RUM setup](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html)

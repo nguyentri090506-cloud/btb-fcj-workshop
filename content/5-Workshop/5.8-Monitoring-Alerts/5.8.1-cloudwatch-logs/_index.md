@@ -1,43 +1,34 @@
 ---
-title: "Amazon CloudWatch Logs"
+title: "Inspect application logs and network flow logs"
+menuTitle: "Amazon CloudWatch Logs"
 weight: 1
 chapter: false
 pre: "<b> 5.8.1. </b> "
 ---
 
-# 5.8.1. Amazon CloudWatch Logs
+1. **Open CloudWatch Console → Logs → Log management → Create log group.** Configure the following fields.
+   - Log group name — `/aws/vpc/flowlogs` as shown
+   - Log class — Standard
+   - Retention — the example shows Never expire; for a lab choose a period such as 7 days and create the group
 
-> **Source status, as reported by the BTB team (18 November 2026):** Backend logging configured.
+{{< btbfigure file="aws-cloudwatch-step-1.webp" caption="The pictured log group is /aws/vpc/flowlogs." step="yes" >}}
 
-## Objective and actual role
+2. **Open VPC → Your VPCs → select the VPC → Flow logs → Create flow log.** Choose All or Reject, destination CloudWatch Logs, the new log group and a delivery role authorized to write. Create the flow log.
 
-Centralized Spring Boot stdout/stderr logs for task startup, API issues and integrations.
+3. **Create the backend log group.** Return to CloudWatch → Create log group → enter `/ecs/btb-backend`. In the ECS task definition select awslogs, this group, Singapore Region and prefix ecs. Deploy the new revision.
 
-## Lab: inspect, document and verify the existing production setup
+4. **Open the log stream for the task ID.** Note the time you call /api/health and compare it with application logs, or read the group with the following command.
 
-1. Open CloudWatch → Logs → Log groups; locate the group named by the ECS task definition's awslogs configuration.
-2. Inspect log streams for currently running ECS task(s) and verify timestamps match the latest production release.
-3. Perform a non-destructive GET request on the real API; observe a corresponding operational trace/log event if application logging is designed for it.
-4. Search for WARN/ERROR and identify common failures: DB connection, Bedrock permission, SePay webhook handler or SMTP delivery; redact any personal data.
-5. Check log retention and expected ingestion cost; set retention with team approval rather than leaving lab logs indefinitely.
-6. Capture a sanitized screenshot of log group, streams and one relevant event; never publish JWTs, emails, passwords or connection strings.
 
-## Expected outcome / result recording
+```powershell
+aws logs tail /ecs/btb-backend --since 10m --region ap-southeast-1
+```
 
-**Expected:** Logs are linked to the running task and support troubleshooting without leaking secrets.
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+**Verify.** Check for Spring startup logs in the ECS group and flow records for matching traffic in the VPC group. To find ALB HTTP status inspect the S3 access logs from 5.6.2.
 
-## Risks and operational notes
+## References
 
-CloudWatch Logs are not a substitute for application-level business audit records.
+- [ECS awslogs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html)
 
-## Screenshot evidence to capture
-
-Task awslogs setup, log streams, sanitized error or health log.
-
-**Suggested path:** `static/images/5-workshop/5.8.1-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html>
+- [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html)

@@ -1,36 +1,37 @@
 ---
-title: "Triển khai CI/CD"
+title: "Từ commit GitHub đến bản phát hành BTB"
+menuTitle: "Triển khai CI/CD"
 weight: 10
 chapter: false
 pre: "<b> 5.10. </b> "
 ---
 
-# 5.10. GitHub Actions CI/CD từ `feat/prod`
 
-Nhóm báo cáo FE/BE deploy tự động qua GitHub Actions từ branch **`feat/prod`** của repo ứng dụng. **Branch này khác `docs/...` dùng viết báo cáo Hugo FCAJ.** Nội dung dưới là bước **kiểm tra workflow đang tồn tại**, không khẳng định nhóm tạo pipeline mới.
 
-## 5.10.1. Frontend — React → S3 → CloudFront
+Tài liệu dự án mô tả deploy FE và BE từ nhánh feat/prod. Mở repo ứng dụng → .github/workflows và tab Actions để lấy trigger, môi trường và run ID thực tế. Workflow gh-pages trong repo Hugo dùng để xuất bản workshop.
 
-1. Vào repo FE → `.github/workflows/`, xác định workflow production trigger `feat/prod`.
-2. Kiểm tra `npm ci`, test nếu có, production build và môi trường; không đặt secret backend trong `VITE_*` vì biến này bị đưa ra browser.
-3. Kiểm tra xác thực AWS (ưu tiên OIDC), đường dẫn sync S3 và CloudFront invalidation; ghi run ID và commit SHA gần nhất thành công.
-4. Mở FE production, đối chiếu asset hash/bản release an toàn; kiểm tra invalidation không còn cache cũ.
-5. Ghi phương án rollback về build/commit cũ; không rollback production chỉ để chụp hình.
+## 1. Xác thực runner với AWS
 
-## 5.10.2. Backend — Spring Boot → Docker → ECR → ECS
+Nếu dùng GitHub OIDC, trong IAM cấu hình provider token.actions.githubusercontent.com, audience sts.amazonaws.com. Hạn chế sub trong trust policy theo repo/branch hoặc environment đúng với job. Job cần permissions id-token: write và contents: read. Role deploy FE cần quyền upload prefix S3 và invalidation distribution lab; role BE cần push ECR, đăng ký revision, cập nhật service và PassRole giới hạn ở hai role ECS.
 
-1. Mở repo BE workflow production, kiểm tra trigger `feat/prod` và deployment environment.
-2. Xem build/test, Docker image tag/digest và role GitHub Actions assume.
-3. Xác minh repository ECR nhận image và lệnh cập nhật task definition/service ECS.
-4. Đối chiếu commit SHA thành công với ECR digest, ECS task definition và ALB healthy targets.
-5. Ghi rollback và cách xử lý build/test/deploy lỗi.
+## 2. Theo bản FE
 
-### Lệnh kiểm tra source code, không deploy
+Trong repo FE, đối chiếu SHA của run với checkout, npm ci và bước build. Upload asset có hash trước rồi cập nhật index.html. Invalidate /index.html và đường gốc khi cần. Mở View Source hoặc Network để đối chiếu tên asset mà HTML mới trỏ tới. Rollback bằng bản build trước còn nguyên file asset và cập nhật lại HTML.
+
+## 3. Theo bản BE
+
+Từ run BE lấy SHA/tag → ECR image digest → task definition revision dùng đúng image → ECS service deployment. Đợi service ổn định và kiểm tra ALB Healthy. Chỉ khi cả hai điều kiện đạt mới đánh dấu deploy thành công. Nếu service quay lại revision cũ, mở ECS Events và stopped reason để xác định task hỏng ở pull image, startup hay health check.
+
 
 ```powershell
-git branch -a
-git log -5 --oneline
-git remote -v
+$region = "ap-southeast-1"
+aws ecs describe-services --cluster LAB_CLUSTER --services LAB_SERVICE --region $region --query "services[].{running:runningCount,desired:desiredCount,revision:taskDefinition}"
+aws elbv2 describe-target-health --target-group-arn LAB_TARGET_GROUP_ARN --region $region --query "TargetHealthDescriptions[].{port:Target.Port,state:TargetHealth.State,reason:TargetHealth.Reason}"
 ```
 
-**Minh chứng:** URL Actions run FE/BE, trigger config, SHA commit, digest ECR, task ECS, object S3 và CloudFront distribution.
+
+Lưu cùng một lần deploy: URL Actions run, commit SHA, image digest, revision và thời gian target healthy. Chưa có Actions run trong bộ ảnh này.
+
+## Tài liệu tham khảo
+
+- [GitHub OIDC in AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)

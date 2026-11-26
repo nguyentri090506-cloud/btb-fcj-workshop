@@ -1,50 +1,47 @@
 ---
-title: "Amazon ECS with AWS Fargate"
+title: "Run the backend on ECS Fargate"
+menuTitle: "Amazon ECS with AWS Fargate"
 weight: 3
 chapter: false
 pre: "<b> 5.6.3. </b> "
 ---
 
-# 5.6.3. Amazon ECS with AWS Fargate
+1. **Open ECS → Clusters → Create cluster.** Name the cluster and choose Fargate. Prepare the ECR URI, two IAM roles, secret, target group and log group before creating the service.
 
-> **Source status, as reported by the BTB team (18 November 2026):** Backend running in production.
+2. **Open Task definitions → Create new task definition.** Enter a family name and select AWS Fargate.
 
-## Objective and actual role
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition.webp" caption="Family and Fargate launch requirements." step="yes" >}}
 
-Runs the modular-monolith Spring Boot API as a managed container workload.
+3. **Choose the environment and both IAM roles.** Compare the fields in the capture.
+   - OS/architecture — Linux/X86_64; network mode — awsvpc
+   - Task size — 0.5 vCPU, 2 GB
+   - Task role — backend role from 5.4.2; Task execution role — ECR, secrets and logging role
 
-## Lab: inspect, document and verify the existing production setup
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-1.webp" caption="CPU, RAM and the two roles in one revision." step="yes" >}}
 
-1. Open ECS → Clusters → select BTB cluster → Services; record actual desired/running/pending task counts and deployment state.
-2. Open service task definition revision; document image URI, port mapping, CPU/memory, Fargate platform, task execution role, task role and logging configuration.
-3. Verify network attachments (subnets/security groups/public-IP setting) and their relationship to ALB target group.
-4. Check ECS deployment events and task health; compare running image digest with ECR and confirm log stream is present in CloudWatch Logs.
-5. Use safe production API tests (read-only catalog or authentication request with test account), without submitting real orders or exposing user data.
-6. Explain restart/rollback path: select a prior **verified** task revision or image digest, update service, monitor healthy targets; do not trigger rollback merely for a documentation test.
+4. **Add the backend container.** Enter `btb-backend`, select the image you pushed, enable Essential and map TCP 8080. Spring Boot must listen on the container interface.
 
-## Expected outcome / result recording
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-2.webp" caption="Container port mapping." step="yes" >}}
 
-**Expected:** Running task count meets desired count, ALB sees healthy targets and corresponding container logs exist.
+5. **Review the container resource allocation limits.** Keep CPU and memory limits compatible with the task size and allow for JVM non-heap memory.
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-3.webp" caption="Review the container resource allocation limits." step="yes" >}}
 
-## Risks and operational notes
+6. **Open Environment variables → Add environment variable.** For Cloudinary, SePay, SMTP and database credentials select ValueFrom and reference the ARN from the Secrets Manager lab.
 
-Running one task or one AZ may be valid for a low-cost demo but must not be described as highly available.
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-4.webp" caption="Cloudinary, SMTP, SePay and database keys in the task." step="yes" >}}
 
-## Screenshot evidence to capture
+7. **Complete the Supabase and Vietmap fields.** Verify the names read by Spring. Use Value for ordinary settings such as JAVA_TOOL_OPTIONS. Under Logging select awslogs, the Region, log group and ecs stream prefix. Register the revision.
 
-ECS service, active tasks, task definition, service events.
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-5.webp" caption="Supabase and Vietmap variables in the task." step="yes" >}}
 
-**Suggested path:** `static/images/5-workshop/5.6.3-01.png` (capture from real Console; do not create a fake screenshot).
+8. **Select Cluster → Services → Create.** Choose the registered family:revision.
+   - Compute — Fargate; desired tasks — 1 for the lab
+   - Networking — private subnets with egress, TASK-SG, public IP off
+   - Load balancing — lab ALB, btb-backend:8080 and IP target group; allow enough startup grace for Spring
 
-## Optional read-only command
+**Verify.** Wait for Running to equal Desired, verify a Healthy target and fetch GET /api/health over HTTPS. For a failed rollout inspect ECS Events and the new task's stopped reason.
 
-```powershell
-# CLI read-only example; replace placeholders
-aws ecs describe-services --cluster <CLUSTER> --services <SERVICE> --region <AWS_REGION>
-```
+## References
 
-## Official reference
-
-<https://docs.aws.amazon.com/AmazonECS/latest/developerguide/what-is-fargate.html>
+- [ECS with ALB](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/alb.html)

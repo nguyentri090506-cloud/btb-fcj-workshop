@@ -1,50 +1,40 @@
 ---
-title: "Amazon S3"
+title: "Lưu bản build React trong S3"
+menuTitle: "Amazon S3"
 weight: 2
 chapter: false
 pre: "<b> 5.5.2. </b> "
 ---
 
-# 5.5.2. Amazon S3
+1. **Tìm Amazon S3 → mở Buckets.**
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã dùng lưu frontend production.
+{{< btbfigure file="aws-s3-step-1.webp" caption="Tìm Amazon S3 → mở Buckets." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Chọn Create bucket → General purpose.**
 
-Lưu file frontend build; ảnh sản phẩm/avatar dùng Cloudinary, không phải S3 frontend.
+{{< btbfigure file="aws-s3-step-2-create-bucket.webp" caption="Chọn Create bucket → General purpose." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Nhập Bucket name và AWS Region.** Chọn tên hợp lệ, duy nhất. Ghi lại tên bucket để upload frontend và cấu hình CloudFront origin.
 
-1. Vào S3 → Buckets, chọn bucket đang chứa frontend build React (`dist/` hoặc `build/`).
-2. Kiểm tra object `index.html`, JS/CSS, Cache-Control, Region, Block Public Access và bucket policy.
-3. Đối chiếu CloudFront origin; nếu bucket private, xác nhận Origin Access Control (OAC) và policy cho CloudFront.
-4. Kiểm tra GitHub Actions sync đúng thư mục build và không vô tình xóa object khác.
-5. Khi lên bản SPA mới, chạy CloudFront invalidation phù hợp rồi tải lại web để xác nhận asset hash mới.
-6. Không dùng bucket frontend để thay thế Cloudinary của ảnh sản phẩm/avatar.
+{{< btbfigure file="aws-s3-step-3-general-configuration.webp" caption="General configuration của bucket frontend." step="yes" >}}
 
-## Kết quả mong đợi và ghi nhận thực tế
+4. **Chọn Bucket owner enforced.** Giữ Block all public access, chọn default encryption rồi Create bucket. CloudFront sẽ đọc qua OAC ở 5.7.2.
 
-**Mong đợi:** CloudFront tải asset thành công; nếu dùng OAC thì S3 không public; refresh route SPA đúng cấu hình.
+{{< btbfigure file="aws-s3-step-4-setup-ownership.webp" caption="Object Ownership và Block Public Access." step="yes" >}}
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+5. **Build và upload storefront.** Ở repo FE, đặt API base URL cho lab. Thay BUCKET_NAME và BUCKET_REGION trước khi chạy lệnh.
 
-## Lưu ý vận hành và rủi ro
-
-Nếu đội triển khai kiểu S3 origin khác, mô tả cấu hình thực tế thay vì khẳng định có OAC.
-
-## Ảnh minh chứng cần chụp
-
-Objects/permission của bucket, origin CloudFront và web tải thành công.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.5.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
-
-## Lệnh kiểm tra tham khảo (read-only)
 
 ```powershell
-# Local sanity check of build folder (choose dist or build as your project uses)
-Get-ChildItem .\dist -ErrorAction SilentlyContinue
+npm ci
+npm run build
+Get-ChildItem dist
+aws s3 sync dist/ s3://BUCKET_NAME/ --region BUCKET_REGION
 ```
+
+
+**Kiểm tra kết quả.** Trong Objects, kiểm tra index.html và assets/ cùng nằm ở root. Sau khi nối CloudFront, mở một asset JS và kiểm tra Content-Type.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>
+- [S3 with CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)
