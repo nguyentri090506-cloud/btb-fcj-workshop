@@ -1,34 +1,38 @@
 ---
-title: "Prerequisites"
+title: "Prepare the lab environment"
+menuTitle: "Prerequisites"
 weight: 2
 chapter: false
 pre: "<b> 5.2. </b> "
 ---
 
-# 5.2. Prerequisites
 
-**This workshop targets inspection and verification of an existing production deployment.** Do not recreate running resources with the same name. Work in a dedicated lab account where experimentation could change or delete resources.
 
-## Access and tooling
+Use an AWS lab account, clone the team's React and Spring Boot repositories and select the revision for the exercise. Prepare deployment permissions, a test mailbox and DNS access if exercising custom domains. Install Docker, Git, Node/npm, AWS CLI, PowerShell and the JDK required by the backend build.
 
-1. AWS account with read access to VPC, ECS, ECR, S3, ALB, ACM, Route 53, WAF, CloudWatch, SNS, RUM, Cognito, IAM, Secrets Manager and Bedrock. Ask the owner for a role with least privilege; mutation requires approval.
-2. GitHub access to the FE/BE repositories and the existing `feat/prod` Actions workflow; Docker for local container verification; Java/Spring Boot + Node/npm for builds; PowerShell, `git`, optional AWS CLI and `curl`.
-3. Real (redacted) FE/API domain names, AWS Regions, ECS cluster/service, ECR repository, S3 bucket, CloudFront distribution, ALB target group, SNS topic and RUM monitor names.
-4. Test-only Customer/Staff/Admin accounts or a safe demo dataset; never publish true customer records or use real transactions for destructive tests.
-5. Screenshots should show relevant resource configuration, current date where possible, expected and observed outcomes; mask ARNs/account identifiers if policy requires and **always redact secret values**.
 
-## Environment facts to fill before proceeding
+```powershell
+git --version
+docker version
+aws --version
+aws sts get-caller-identity --query Arn --output text
+node --version
+npm --version
+```
 
-| Variable | Example / requirement | Actual |
-|---|---|---|
-| `AWS_REGION` | e.g. choose the actual backend Region | TODO |
-| `FRONTEND_DOMAIN` | Actual HTTPS frontend | TODO |
-| `API_DOMAIN` | Actual HTTPS API hostname | TODO |
-| `ECS_CLUSTER`, `ECS_SERVICE` | Existing production names | TODO |
-| `ECR_REPOSITORY`, `S3_BUCKET` | Existing image/static site stores | TODO |
-| `BEDROCK_MODEL_ID` | Actual model or inference profile | TODO |
-| `RUM_MONITOR`, `SNS_TOPIC` | Existing monitoring resources | TODO |
 
-## Safety preparation
+## Values to determine before creating resources
 
-Request approval before changing WAF mode, IAM grants, security groups, deployment tasks, database, payment callbacks or DNS records. Use read-only inspection first. Store evidence in `static/images/5-workshop/` with no credentials.
+**Region.** The backend, Bedrock quota and EventBridge captures use Singapore. The CloudFront certificate is in N. Virginia. For frontend S3 use the Region selected at bucket creation.
+
+**Names and IDs.** The captures show generate-ui-be (ECR), btb-backend (secret), btb-backend-tg (target group), btb-events (bus), btb-customer-events (queue) and btb-system-alerts (SNS). In a shared environment use a lab suffix and update ARNs in all examples.
+
+## Execution order for a fresh account
+
+1. Budget → IAM → VPC and private-task egress. Complete IAM scoping after the secret, bus and queue ARNs exist.
+
+2. ECR/image and S3/build → hosted zone/delegation → two ACM certificates → secret and log group → target group, ALB → ECS service.
+
+3. Create the api alias to ALB → CloudFront/OAC and both behaviors → frontend alias → WAF. Check frontend, deep link and API health.
+
+4. SNS → alarm; RUM → Cognito → rebuild FE; SQS → EventBridge → test message. Finish demo, cost estimate and cleanup in 5.11–5.13.

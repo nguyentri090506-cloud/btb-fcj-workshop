@@ -1,43 +1,30 @@
 ---
-title: "Supabase PostgreSQL & Authentication"
+title: "Connect Spring Boot to Supabase PostgreSQL"
+menuTitle: "Supabase PostgreSQL & Authentication"
 weight: 1
 chapter: false
 pre: "<b> 5.9.1. </b> "
 ---
 
-# 5.9.1. Supabase PostgreSQL & Authentication
+1. **Open Supabase Dashboard → lab project → Connect.** Select a direct connection or session pooler according to task connectivity. If egress is IPv4-only and the direct endpoint needs IPv6, select the session pooler. Record the displayed host, port, database and user.
 
-> **Source status, as reported by the BTB team (18 November 2026):** In production service inventory; exact Supabase Auth vs Spring Boot JWT ownership must be confirmed against running code.
+2. **Open Secrets Manager → backend secret → Edit.** Populate SUPABASE_DB_URL as a JDBC URL with the project's TLS settings, SUPABASE_DB_USERNAME and SUPABASE_DB_PASSWORD. Map each via ECS ValueFrom and deploy fresh tasks.
 
-## Objective and actual role
+{{< btbfigure file="aws-secret-manager-step-1.webp" caption="Connection keys shown in the Secrets Manager capture." step="yes" >}}
 
-External PostgreSQL database and reported authentication component for BTB.
+3. **In Supabase open SQL Editor → New query → Run.** Verify the current database and role.
 
-## Lab: inspect, document and verify the existing production setup
 
-1. Open the Supabase project dashboard and record project Region and network policy without copying connection passwords or project service-role keys.
-2. Confirm which backend connections use PostgreSQL directly and which use Supabase Auth; inspect current production Spring Security/JWT integration to resolve the historical document conflict.
-3. Verify private ECS tasks can connect to Supabase over TLS using the approved outbound route and correct DNS/port.
-4. Use a read-only, test-data query through the real Spring Boot API; inspect error logs if DNS, TLS, pool or timeout fails.
-5. Test a non-sensitive login/onboarding scenario against the actual current auth owner, distinguishing OTP activation from JWT authorization.
-6. Ensure browser-side public keys are not confused with service-role keys, and restrict access to Customer/Staff data on the backend.
+```sql
+select current_database() as database_name, current_user as role_name;
+select 1 as connection_ok;
+```
 
-## Expected outcome / result recording
 
-**Expected:** Database connectivity and auth behavior have real evidence; architecture records who actually issues/verifies tokens.
+4. **Open the BTB catalog and find a known demo SKU.** Compare it with the lab project data. For a connection failure check the pooler username, JDBC URL, task revision and egress.
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+**Verify.** SQL Editor verifies the database side. The backend catalog request verifies the connection from ECS. Determine Auth/JWT behavior from the deployed Spring Security configuration.
 
-## Risks and operational notes
+## References
 
-Master context has contradictory Supabase Auth descriptions. The user-provided production list is newer, but code/config must resolve the exact implementation.
-
-## Screenshot evidence to capture
-
-Project settings (redacted), backend connection success and test auth response.
-
-**Suggested path:** `static/images/5-workshop/5.9.1-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://supabase.com/docs/guides/database/overview>
+- [Supabase connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)

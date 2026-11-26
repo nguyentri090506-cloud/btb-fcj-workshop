@@ -1,50 +1,39 @@
 ---
-title: "Amazon ECR"
+title: "Đưa image Spring Boot lên Amazon ECR"
+menuTitle: "Amazon ECR"
 weight: 1
 chapter: false
 pre: "<b> 5.5.1. </b> "
 ---
 
-# 5.5.1. Amazon ECR
+1. **Tìm Elastic Container Registry trong AWS Console → mở Private registry.**
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đang dùng trong CI/CD.
+{{< btbfigure file="aws-ecr-step-1.webp" caption="Tìm Elastic Container Registry trong AWS Console → mở Private registry." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Chọn Repositories → Create repository.** Chọn Private, nhập `generate-ui-be`, chọn chế độ tag rồi bấm Create. Với immutable tags, dùng tag mới cho từng build.
 
-Kho Docker image backend để ECS Fargate kéo về chạy.
+{{< btbfigure file="aws-ecr-step-2-create-private-repository.webp" caption="Tên repository mà task definition sẽ tham chiếu." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Chọn repository → View push commands → Windows.** Mở PowerShell tại thư mục Dockerfile của BE. Dùng Docker, AWS CLI và AWS Tools for PowerShell cùng tài khoản lab. Đoạn dưới làm theo bốn thao tác trong ảnh và dùng commit SHA làm tag đẩy lên ECR.
 
-1. Mở ECR → Private repositories, xác định repository backend BTB; ghi tên, Region, mã hóa và chiến lược tag thực tế.
-2. Xem Images, ghi digest/tag, thời điểm push và dung lượng của phiên bản đang deploy; không tự đoán số version.
-3. Kiểm tra các bước xác thực, Docker build, push trong GitHub Actions; ưu tiên role ngắn hạn nếu đang cấu hình.
-4. Mở ECS task definition, đối chiếu image URI/digest với ECR; xác nhận đúng bản release chạy thật.
-5. Xem scanning và lifecycle policy; trao đổi trước khi xóa các image cũ để vẫn rollback được.
-6. Lưu bằng chứng push image thành công và ECS triển khai từ pipeline production.
+{{< btbfigure file="aws-ecr-step-3-display-commands.webp" caption="Lệnh Windows trong View push commands." step="yes" >}}
 
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** Image digest của ECS đang chạy khớp image trong ECR.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Tag `latest` không đủ truy vết release; nên lưu SHA/digest cố định.
-
-## Ảnh minh chứng cần chụp
-
-Danh sách image ECR, digest và image URI ở ECS task definition.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.5.1-01.png` (chụp Console thật; không tự tạo ảnh giả).
-
-## Lệnh kiểm tra tham khảo (read-only)
 
 ```powershell
-# Illustrative only: replace placeholders and ensure AWS CLI auth is configured
-aws ecr describe-images --repository-name <ECR_REPOSITORY> --region <AWS_REGION>
+$region = "ap-southeast-1"
+$account = aws sts get-caller-identity --query Account --output text
+$registry = "$account.dkr.ecr.$region.amazonaws.com"
+$tag = git rev-parse --short HEAD
+(Get-ECRLoginCommand -Region $region).Password | docker login --username AWS --password-stdin $registry
+docker build --platform linux/amd64 -t generate-ui-be .
+docker tag generate-ui-be:latest "${registry}/generate-ui-be:${tag}"
+docker push "${registry}/generate-ui-be:${tag}"
+aws ecr describe-images --region $region --repository-name generate-ui-be --image-ids imageTag=$tag --query "imageDetails[0].imageDigest"
 ```
+
+
+**Kiểm tra kết quả.** Mở Images → chọn tag vừa push. So digest với kết quả describe-images. Ghi lại URI và digest cho task definition.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html>
+- [ECR private image push](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)

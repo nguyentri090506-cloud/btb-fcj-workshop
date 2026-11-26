@@ -1,50 +1,47 @@
 ---
-title: "Amazon ECS kết hợp AWS Fargate"
+title: "Chạy backend bằng ECS Fargate"
+menuTitle: "Amazon ECS kết hợp AWS Fargate"
 weight: 3
 chapter: false
 pre: "<b> 5.6.3. </b> "
 ---
 
-# 5.6.3. Amazon ECS kết hợp AWS Fargate
+1. **Mở ECS → Clusters → Create cluster.** Đặt tên cluster và chọn Fargate. Chuẩn bị URI ECR, hai role IAM, secret, target group và log group trước khi tạo service.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Backend đã chạy production.
+2. **Mở Task definitions → Create new task definition.** Nhập family và chọn AWS Fargate.
 
-## Mục tiêu và vai trò trong hệ thống
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition.webp" caption="Family và lựa chọn Fargate." step="yes" >}}
 
-Chạy API Spring Boot modular monolith qua container managed.
+3. **Chọn môi trường và hai IAM role.** Đối chiếu các trường trong ảnh.
+   - OS/architecture — Linux/X86_64; network mode — awsvpc
+   - Task size — 0,5 vCPU, 2 GB
+   - Task role — role backend ở 5.4.2; Task execution role — role tải ECR/secret và ghi log
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-1.webp" caption="CPU, RAM, task role và execution role trong cùng revision." step="yes" >}}
 
-1. Mở ECS → Clusters → service BTB; ghi desired/running/pending tasks và trạng thái deployment thực tế.
-2. Ở task definition revision, ghi image URI, cổng, CPU/RAM, Fargate platform, execution role, task role và logging.
-3. Kiểm tra subnet/SG/public IP của task và target group ALB gắn với ECS.
-4. Đọc ECS deployment events, task health; so image digest với ECR và xác nhận log stream có trên CloudWatch Logs.
-5. Test API production an toàn (GET catalog hoặc auth bằng tài khoản test), không tạo đơn thật hoặc lộ dữ liệu khách.
-6. Mô tả rollback về task revision/image digest **đã kiểm chứng**, update service và theo dõi target healthy; không rollback thật chỉ để minh họa.
+4. **Thêm container backend.** Nhập tên `btb-backend`, chọn image đã push, bật Essential và map TCP 8080. Spring Boot phải lắng nghe trên interface của container.
 
-## Kết quả mong đợi và ghi nhận thực tế
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-2.webp" caption="Port mapping container." step="yes" >}}
 
-**Mong đợi:** Số running task đáp ứng desired, ALB có target healthy và CloudWatch có log tương ứng.
+5. **Kiểm tra Resource allocation limits của container.** Đặt giới hạn CPU/RAM tương thích với task size. Chừa bộ nhớ cho JVM ngoài heap khi đặt giới hạn.
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-3.webp" caption="Kiểm tra Resource allocation limits của container." step="yes" >}}
 
-## Lưu ý vận hành và rủi ro
+6. **Mở Environment variables → Add environment variable.** Với Cloudinary, SePay, SMTP và database, chọn ValueFrom cho key nhạy cảm và tham chiếu ARN từ bài Secrets Manager.
 
-Chạy 1 task/1 AZ có thể là cấu hình tiết kiệm nhưng không được gọi là high availability.
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-4.webp" caption="Khóa cấu hình Cloudinary, SMTP, SePay và database trong task." step="yes" >}}
 
-## Ảnh minh chứng cần chụp
+7. **Hoàn tất biến Supabase và Vietmap.** Kiểm tra tên key Spring đọc. Dùng Value cho cấu hình thường như JAVA_TOOL_OPTIONS. Trong Logging chọn awslogs, đúng Region, log group và stream prefix ecs. Tạo revision.
 
-ECS service, task đang chạy, task definition, service events.
+{{< btbfigure file="aws-application-load-balancer-step-4-create-task-definition-5.webp" caption="Biến Supabase và Vietmap trong task." step="yes" >}}
 
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.6.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
+8. **Chọn Cluster → Services → Create.** Chọn family:revision vừa tạo.
+   - Compute — Fargate; Desired tasks — 1 cho lab
+   - Networking — subnet private có egress, TASK-SG, tắt public IP
+   - Load balancing — ALB lab, btb-backend:8080 và target group IP; đặt grace period đủ cho Spring khởi động
 
-## Lệnh kiểm tra tham khảo (read-only)
-
-```powershell
-# CLI read-only example; replace placeholders
-aws ecs describe-services --cluster <CLUSTER> --services <SERVICE> --region <AWS_REGION>
-```
+**Kiểm tra kết quả.** Đợi Running = Desired, kiểm tra target Healthy rồi gọi GET /api/health qua HTTPS. Nếu rollout lỗi, xem ECS Events và stopped reason của task mới.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonECS/latest/developerguide/what-is-fargate.html>
+- [ECS with ALB](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/alb.html)

@@ -1,13 +1,14 @@
 ---
 title: "Tích hợp dịch vụ bên ngoài"
+menuTitle: "Tích hợp dịch vụ bên ngoài"
 weight: 9
 chapter: false
 pre: "<b> 5.9. </b> "
 ---
 
-# 5.9. Tích hợp dịch vụ bên ngoài
 
-Giai đoạn này ghi cấu hình BTB theo báo cáo của nhóm. Xem từng bài lab, bổ sung kết quả và ảnh chụp resource thật.
+
+Dùng các bài này để kiểm tra một tích hợp từ giao diện BTB đến nhà cung cấp. Bộ ảnh AWS có key cấu hình backend và một số màn DNS/WAF liên quan. Các bước trên dashboard nhà cung cấp là hướng dẫn thực hành.
 
 - [5.9.1. Supabase PostgreSQL và xác thực](5.9.1-supabase/) — Database PostgreSQL và thành phần xác thực được nhóm báo cáo đang dùng.
 - [5.9.2. Cloudinary lưu trữ ảnh](5.9.2-cloudinary/) — Lưu ảnh sản phẩm, nội dung và avatar BTB; độc lập với S3 frontend.

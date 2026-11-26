@@ -1,43 +1,33 @@
 ---
-title: "AWS Certificate Manager (ACM)"
+title: "Issue certificates for the website and API"
+menuTitle: "AWS Certificate Manager (ACM)"
 weight: 1
 chapter: false
 pre: "<b> 5.7.1. </b> "
 ---
 
-# 5.7.1. AWS Certificate Manager (ACM)
+1. **Select N. Virginia (us-east-1) → ACM → Request a certificate → Request a public certificate.**
 
-> **Source status, as reported by the BTB team (18 November 2026):** Certificates issued and used.
+{{< btbfigure file="aws-certificate-manager-step-1-request-a-public-certificate.webp" caption="Select N. Virginia (us-east-1) → ACM → Request a certificate → Request a public certificate." step="yes" >}}
 
-## Objective and actual role
+2. **Enter the storefront names → DNS validation → Request.** Include apex and www if serving both. Under Domains create the validation CNAME in the authoritative zone.
 
-TLS certificates for frontend CloudFront domain and backend ALB API domain.
+{{< btbfigure file="aws-certificate-manager-step-2-setup-certificate.webp" caption="Domain names and DNS validation for the frontend certificate." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Open Certificates in N. Virginia.** Wait for Issued and verify coverage of the CloudFront alternate domain names.
 
-1. Open ACM; inspect frontend certificate in **us-east-1** for CloudFront custom domain and note the exact domain coverage/validation status.
-2. Switch to the ALB Region; inspect the API certificate issued for the backend hostname.
-3. Verify both certificates are `Issued`, cover their live hostnames and have appropriate renewal/validation mechanism.
-4. Inspect CloudFront Viewer certificate and ALB HTTPS listener to confirm the respective ACM certificate is actually attached.
-5. Test frontend and API hostnames over HTTPS in a browser or `curl`; verify no hostname mismatch or certificate warning.
-6. Record expiration/renewal status without exposing any private key material.
+{{< btbfigure file="aws-certificate-manager-step-3-issued-virginia.webp" caption="N. Virginia certificate in Issued state." step="yes" >}}
 
-## Expected outcome / result recording
+4. **Switch to Singapore → Request a public certificate for the API hostname.** Repeat DNS validation using the name served by the ALB listener.
 
-**Expected:** Two HTTPS paths use matching certificates and resolve without browser warnings.
+{{< btbfigure file="aws-certificate-manager-step-2-setup-certificate-singapore.webp" caption="Certificate request in Singapore." step="yes" >}}
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+5. **Open Certificates in Singapore and verify Issued.** Select this certificate for HTTPS:443 on the ALB. Retain the validation CNAME for renewal.
 
-## Risks and operational notes
+{{< btbfigure file="aws-certificate-manager-step-3-issued-singapore.webp" caption="Singapore certificate in Issued state." step="yes" >}}
 
-CloudFront custom certificate is in us-east-1; ALB uses a certificate from its own Region.
+**Verify.** For Pending validation check domain delegation and the DNS CNAME. If an issued certificate is missing from a selector, check Region and account.
 
-## Screenshot evidence to capture
+## References
 
-Certificate metadata and CloudFront/ALB association; live HTTPS lock.
-
-**Suggested path:** `static/images/5-workshop/5.7.1-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html>
+- [CloudFront certificate requirements](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html)

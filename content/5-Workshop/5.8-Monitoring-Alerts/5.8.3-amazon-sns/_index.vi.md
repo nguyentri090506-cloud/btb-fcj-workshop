@@ -1,43 +1,31 @@
 ---
-title: "Amazon SNS"
+title: "Gửi cảnh báo vận hành qua SNS"
+menuTitle: "Amazon SNS"
 weight: 3
 chapter: false
 pre: "<b> 5.8.3. </b> "
 ---
 
-# 5.8.3. Amazon SNS
+1. **Tìm Simple Notification Service → mở Topics.**
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã cấu hình subscription email.
+{{< btbfigure file="aws-sns-step-1.webp" caption="Tìm Simple Notification Service → mở Topics." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Chọn Create topic → Standard.** Nhập tên `btb-system-alerts`, giữ cùng Region với alarm, rồi chọn Create topic.
 
-Gửi email cảnh báo alarm đến email subscriber đã xác nhận.
+{{< btbfigure file="aws-sns-step-2-create-topic.webp" caption="Chọn Standard topic cho email cảnh báo." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Mở topic → Create subscription.** Protocol: Email; Endpoint: hộp thư lab. Bấm Create subscription. Trạng thái ban đầu có thể là Pending confirmation.
 
-1. Mở SNS → Topics, tìm topic gắn alarm CloudWatch production và ghi ARN (không kèm credential).
-2. Mở Subscriptions, xác nhận `Protocol = Email`, email đích và trạng thái `Confirmed`, không phải PendingConfirmation.
-3. Đối chiếu action của CloudWatch Alarm đang publish đúng SNS topic.
-4. Kiểm tra inbox/spam tìm email alarm đã có hoặc kiểm thử có phê duyệt của nhóm.
-5. Lưu timestamp, subject và vai trò email nhận; che địa chỉ theo chính sách nếu cần.
-6. Phân biệt email cảnh báo hạ tầng SNS với email OTP khách hàng gửi bằng Gmail SMTP.
+{{< btbfigure file="aws-sns-step-3-create-subscription.webp" caption="Mở topic → Create subscription." step="yes" >}}
 
-## Kết quả mong đợi và ghi nhận thực tế
+4. **Mở thư AWS Notification → Confirm subscription.** Quay lại Subscriptions và kiểm tra đã có subscription ID.
 
-**Mong đợi:** Subscription đã xác nhận, alarm trỏ đúng topic và có minh chứng email nếu từng được gửi.
+{{< btbfigure file="aws-sns-step-4-confirm.webp" caption="Nội dung email mời xác nhận." step="yes" >}}
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+5. **Mở topic → Publish message.** Nhập subject BTB lab và nội dung thử; đối chiếu topic ARN, người nhận và thời gian email đến.
 
-## Lưu ý vận hành và rủi ro
-
-Có subscription SNS không đồng nghĩa alarm đã thực sự kích hoạt.
-
-## Ảnh minh chứng cần chụp
-
-SNS topic/subscription (che email) và thư cảnh báo nếu đã có.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.8.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Hộp thư lab nhận đúng nội dung. Nếu chưa tới, kiểm tra Pending confirmation, spam và Region.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html>
+- [SNS email subscriptions](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html)

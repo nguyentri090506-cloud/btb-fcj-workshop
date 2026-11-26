@@ -1,43 +1,65 @@
 ---
-title: "Application Load Balancer"
+title: "Route HTTPS from the ALB to Spring Boot"
+menuTitle: "Application Load Balancer"
 weight: 2
 chapter: false
 pre: "<b> 5.6.2. </b> "
 ---
 
-# 5.6.2. Application Load Balancer
+## Create the Fargate target group
 
-> **Source status, as reported by the BTB team (18 November 2026):** Operating in production.
+1. **Open EC2 → Load Balancing → Target Groups.**
 
-## Objective and actual role
+{{< btbfigure file="aws-application-load-balancer-step-1.webp" caption="Open EC2 → Load Balancing → Target Groups." step="yes" >}}
 
-HTTPS API entry point forwarding requests to healthy ECS targets.
+2. **Choose Create target group → IP addresses.** Enter `btb-backend-tg`. For awsvpc tasks ECS registers the task's private IP.
 
-## Lab: inspect, document and verify the existing production setup
+{{< btbfigure file="aws-application-load-balancer-step-2-create.webp" caption="Create an IP target group." step="yes" >}}
 
-1. Open EC2 → Load Balancers and record the production Application Load Balancer's name, scheme and VPC.
-2. Check listeners: which ports/protocols are enabled, whether HTTPS 443 is attached to a valid ACM certificate, and any HTTP→HTTPS redirect rule.
-3. Open Target groups and verify protocol/port, **IP** target type for awsvpc Fargate tasks, configured health-check path and success codes.
-4. Inspect registered targets; confirm desired ECS tasks are healthy and note any unhealthy reason rather than guessing.
-5. Review ALB security group inbound rules and ECS task SG source restrictions; ensure direct access to backend task port is not public.
-6. Use your actual API domain to test a safe read-only endpoint; capture status, TLS and routing evidence.
+3. **Select the protocol, port and VPC.** Set HTTP, port 8080, IPv4 and the VPC hosting the tasks.
 
-## Expected outcome / result recording
+{{< btbfigure file="aws-application-load-balancer-step-2.webp" caption="Select the protocol, port and VPC." step="yes" >}}
 
-**Expected:** HTTPS listener is valid, healthy target registration matches ECS tasks, and API responds through ALB.
+4. **Open Health checks.** Select HTTP, traffic port and path `/api/health`. The endpoint must return 200 to the health checker.
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+{{< btbfigure file="aws-application-load-balancer-step-22.webp" caption="BTB health check path." step="yes" >}}
 
-## Risks and operational notes
+5. **Open Advanced health check settings → Next.** Compare the pictured settings.
+   - Unhealthy threshold — 2
+   - Timeout — 5 seconds
+   - Interval — 30 seconds
+   - Success codes — 200
 
-For an ALB-direct API, a WAF on CloudFront does not protect this API; associate a separate Regional Web ACL.
+{{< btbfigure file="aws-application-load-balancer-step-23.webp" caption="Timeout, interval and success code." step="yes" >}}
 
-## Screenshot evidence to capture
+6. **Open Register targets.** The form illustrates selecting a network and entering an IP. For the ECS service in 5.6.3 let ECS register its task IP automatically.
 
-ALB listeners, target health, target type IP, and safe API response.
+{{< btbfigure file="aws-application-load-balancer-step-3-register-target.webp" caption="Open Register targets." step="yes" >}}
 
-**Suggested path:** `static/images/5-workshop/5.6.2-01.png` (capture from real Console; do not create a fake screenshot).
+7. **Check the target port and finish creating the group.** The pictured target uses port 8080. Record the group name for the listener and service.
 
-## Official reference
+{{< btbfigure file="aws-application-load-balancer-step-3-register-target-1.webp" caption="Target IP and backend port." step="yes" >}}
 
-<https://docs.aws.amazon.com/AmazonECS/latest/developerguide/alb.html>
+## Create the HTTPS listener and review attributes
+
+8. **Open Load balancers → Create → Application Load Balancer.** Select internet-facing, the lab VPC, two public subnets in different AZs and ALB-SG. Create HTTPS:443, select the Singapore certificate from 5.7.1 and forward to btb-backend-tg.
+
+9. **Inspect the HTTP:80 listener if present.** The capture shows the old listener's deletion dialog. Keep HTTPS:443. HTTP:80 can redirect to HTTPS; remove an unused lab listener only after checking its replacement.
+
+{{< btbfigure file="aws-application-load-balancer-step-5-delete-listener.webp" caption="Inspect the HTTP:80 listener if present." step="yes" >}}
+
+10. **Open ALB → Attributes → Edit.** Inspect connection idle timeout and X-Forwarded-For processing. Adjust timeouts according to measured application behavior.
+
+{{< btbfigure file="aws-application-load-balancer-step-6-edit-attributes.webp" caption="Open ALB → Attributes → Edit." step="yes" >}}
+
+11. **Under Logging choose a destination if required.** For S3 access logs use a same-Region log bucket with ELB delivery permission. Review and save changes.
+
+{{< btbfigure file="aws-application-load-balancer-step-6-edit-attributes-1.webp" caption="ALB attributes including deletion protection and access logs." step="yes" >}}
+
+**Verify.** After the ECS lab open Targets → Health details. For timeouts inspect SGs and ports. For ResponseCodeMismatch check path and status. Compare Java logs in CloudWatch against ALB and target status in the access log.
+
+## References
+
+- [ALB health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html)
+
+- [ALB access logs](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html)

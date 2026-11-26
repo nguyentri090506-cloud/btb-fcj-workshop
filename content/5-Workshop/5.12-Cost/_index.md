@@ -1,42 +1,30 @@
 ---
-title: "Cost Estimation"
+title: "Cost of a sample BTB environment"
+menuTitle: "Cost Estimation"
 weight: 12
 chapter: false
 pre: "<b> 5.12. </b> "
 ---
 
-# 5.12. Cost Estimation & Optimization
 
-Use the **[AWS Pricing Calculator](https://calculator.aws/)** and record the deployed Region, workload assumptions, monthly hours and usage. Do **not** invent a monthly bill. AWS Budgets threshold and AWS actual billing data are separate from a Calculator estimate.
+The task-definition capture shows Linux/x86, 0.5 vCPU and 2 GB. This Singapore example assumes one task and one ALB for 730 hours per month, averaging one LCU. The USD list prices were retrieved on 25 November 2026 and exclude tax, credits and Free Tier. Task count, hours and LCU are exercise assumptions.
 
-## Cost input checklist
+| Charge | Quantity × rate | USD/month |
+|---|---|---:|
+| Fargate vCPU | 0.5 × 730 × 0.05056 | 18.4544 |
+| Fargate RAM | 2 × 730 × 0.00553 | 8.0738 |
+| ALB hours | 1 × 730 × 0.0252 | 18.3960 |
+| ALB LCU | 1 × 730 × 0.008 | 5.8400 |
 
-| Service | Usage/cost driver to measure | Actual |
-|---|---|---|
-| ECS Fargate | task count, vCPU, RAM GiB, run hours | TODO |
-| ALB | active hours, LCU and processed traffic | TODO |
-| ECR | image GB stored, scanning type, lifecycle | TODO |
-| S3 | GB/month, request count, versioning | TODO |
-| CloudFront | outbound GB by geography, requests, invalidations | TODO |
-| Route 53 + ACM | hosted zone/queries, certificate type | TODO |
-| Secrets Manager | secrets/month and API calls | TODO |
-| CloudWatch Logs/Metrics/Alarms | log ingest/retention, custom metrics, alarms | TODO |
-| SNS | notification message count | TODO |
-| CloudWatch RUM | browser event ingestion/retention | TODO |
-| Cognito Identity Pools | supported credential usage pattern; validate applicable charges | TODO |
-| AWS WAF | web ACLs, rules, managed groups and requests | TODO |
-| Amazon Bedrock | tokens/model pricing, inference method, Region | TODO |
-| VPC networking | public IPv4, outbound data, optional NAT/endpoint only if deployed | TODO |
-| AWS Budgets | applicable budget pricing/notifications | TODO |
-| External providers | Supabase, Cloudinary, Vietmap, SePay, Gmail SMTP plans/usage | TODO (separate estimate) |
+**Fargate + ALB subtotal: USD 50.76/month.** With the same assumptions, a four-hour lab costs about USD 0.28 for these items. The complete bill also depends on the services below. The USD 200 in lab 5.4.1 is an alert budget.
 
-## Optimization decisions
+## Complete the estimate for the demo
 
-1. Check real ECS CPU/memory and ALB metrics before right-sizing; keep availability limitations explicit if running one task/AZ.
-2. Cache immutable frontend assets appropriately, and audit CloudFront data transfer.
-3. Retain CloudWatch logs for a stated period; set ECR image lifecycle and S3 version retention as approved.
-4. Review WAF sampled requests before changing backend rule from Count to Block.
-5. Monitor Bedrock token consumption and RUM sampling/ingestion; neither is guaranteed free.
-6. Attach a dated Calculator screenshot/export with assumptions and use Budgets to monitor actual spend.
+1. Create an AWS Pricing Calculator estimate, select Singapore for compute and use LCU usage measured in CloudWatch. Multiply CPU/RAM by total task-hours. Include overlapping task revisions during rollout.
+2. Add ECR (image GB), S3 (GB, requests, versions), CloudFront (viewer-region transfer and requests), Route 53 (zones/queries), WAF (ACLs, rules, requests), Secrets Manager (secrets and calls). Check the ACM certificate type.
+3. Add public IPv4, hourly and per-GB NAT or per-AZ interface endpoints, and data transfer as applicable. For CloudWatch include log ingestion/retention, alarms and RUM events. Add SNS delivery, EventBridge custom events/archives, SQS requests/DLQ and tokens for the actual Bedrock model.
+4. Compare Calculator totals with Cost Explorer for the same period, account and Region. Keep external provider costs separate. Save the estimate link/export with its date and assumptions after entering real usage.
 
-**Deliverables:** Calculator URL/export, assumptions, service breakdown and optimization explanation. No numeric total is claimed until inputs are known.
+**Tune from measurements.** Remove lab resources after the exercise, measure CPU and memory before resizing tasks, reduce RUM sampling after testing and set log/archive retention. Check the egress needed by Supabase and SMTP before choosing NAT or endpoints.
+
+[Amazon ECS price list · Singapore](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/current/ap-southeast-1/index.json) · [ELB price list · Singapore](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/current/ap-southeast-1/index.json) · [AWS Pricing Calculator](https://calculator.aws/)

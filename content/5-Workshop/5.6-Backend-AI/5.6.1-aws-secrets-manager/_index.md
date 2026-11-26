@@ -1,43 +1,31 @@
 ---
-title: "AWS Secrets Manager"
+title: "Store backend configuration in Secrets Manager"
+menuTitle: "AWS Secrets Manager"
 weight: 1
 chapter: false
 pre: "<b> 5.6.1. </b> "
 ---
 
-# 5.6.1. AWS Secrets Manager
+1. **Open Secrets Manager → Store a new secret → Other type of secret.** Under Key/value enter the names Spring Boot reads and their values from your lab project. The capture shows the key column.
 
-> **Source status, as reported by the BTB team (18 November 2026):** Backend secret has been created; field schema/access mapping requires verification.
+{{< btbfigure file="aws-secret-manager-step-1.webp" caption="Connection keys shown in the Secrets Manager capture." step="yes" >}}
 
-## Objective and actual role
+2. **Choose Next → Configure secret.** Enter `btb-backend` and a description. Use the ECS Region.
 
-Protects backend connection parameters, AI configuration, webhook credentials and mail secrets.
+{{< btbfigure file="aws-secret-manager-step-2-configure.webp" caption="Secret name and description." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Open Configure rotation.** For a lab using manually managed credentials leave automatic rotation off. To enable rotation first configure matching provider-side updates. Choose Next.
 
-1. Open Secrets Manager → Secrets and locate the existing backend secret by name, not by its secret value.
-2. Verify Region, secret name/ARN, rotation configuration (if any), last modified date and KMS settings where applicable.
-3. Open ECS task definition → Container → Secrets; verify the reference to each required secret key/environment name, or document app-side retrieval if that design is used.
-4. Confirm ECS task execution role can fetch task-definition secrets; if the app fetches them at runtime, verify task-role access separately.
-5. Check backend logs contain no secret values or raw connection strings, and document secure redeploy after a credential change.
-6. Record only secret names and configuration shape; never capture or publish the `Retrieve secret value` screen.
+{{< btbfigure file="aws-secret-manager-step-3-rotation.webp" caption="Open Configure rotation." step="yes" >}}
 
-## Expected outcome / result recording
+4. **Review and choose Store.** Check the name and encryption key. Copy the complete secret ARN, including its AWS-generated suffix.
 
-**Expected:** Secret references are resolved by the correct role, and a newly started backend task can initialize without exposed credentials.
+{{< btbfigure file="aws-secret-manager-step-4-review.webp" caption="Verify the secret type and encryption key on Review." step="yes" >}}
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+5. **Open ECS → Task definitions → Create new revision → Container → Environment variables.** Choose ValueFrom for each key using `SECRET_ARN:JSON_KEY::`. Grant GetSecretValue to the execution role. Use Linux Fargate 1.4.0 or later for individual JSON keys.
 
-## Risks and operational notes
+**Verify.** After deploying a new task, read the catalog through the API. For ResourceInitializationError check the ARN, JSON key name, execution role permission and egress to Secrets Manager.
 
-Restarting a task may be needed to pick up changed injected environment secrets; do not assume live rotation.
+## References
 
-## Screenshot evidence to capture
-
-Secret metadata and ECS secret references with values hidden.
-
-**Suggested path:** `static/images/5-workshop/5.6.1-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data-secrets.html>
+- [ECS secret injection](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html)

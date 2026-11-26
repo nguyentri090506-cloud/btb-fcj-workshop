@@ -1,43 +1,25 @@
 ---
-title: "Amazon Bedrock"
+title: "Kiểm tra quyền gọi model và quota Bedrock"
+menuTitle: "Amazon Bedrock"
 weight: 4
 chapter: false
 pre: "<b> 5.6.4. </b> "
 ---
 
-# 5.6.4. Amazon Bedrock
+1. **Mở Amazon Bedrock tại Singapore → Quotas.** Lọc theo model và inference type. Policy mẫu ở 5.4.2 dùng APAC Nova Pro; hộp thoại quota sau là của Nova 2 Lite global cross-region.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã cấu hình model và IAM; endpoint AI trên backend production chưa xác minh.
+{{< btbfigure file="aws-bedrock-step-1.webp" caption="Danh sách quota theo model và inference type." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Chọn model → Request RPM quota increase.** Đọc quota áp dụng cho số request/phút. Ảnh báo đã có yêu cầu đang chờ. Kiểm tra yêu cầu đó trong Service Quotas.
 
-Cung cấp AI model inference cho backend/Generate UI; quyền nghiệp vụ vẫn do Spring Boot kiểm soát.
+{{< btbfigure file="aws-bedrock-step-2-request-rpm.webp" caption="Hộp thoại RPM báo đã có yêu cầu đang chờ." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Mở Request TPM quota increase.** Đối chiếu tokens/phút cho đúng model. Nếu cần tăng, nhập tổng quota mong muốn theo workload và theo dõi trạng thái riêng của yêu cầu.
 
-1. Mở Amazon Bedrock đúng Region, ghi model ID/inference profile ứng dụng sử dụng và quyền model tại Region đó.
-2. Kiểm tra IAM policy của ECS task role cho thao tác invoke model và ARN/resource cần dùng.
-3. Đối chiếu cấu hình provider trong Secrets Manager/ECS runtime mà không in API key, prompt có thông tin cá nhân hoặc credential.
-4. Gửi request kiểm thử **không nhạy cảm** đến endpoint AI thật của BE; nếu chưa biết đường dẫn thì xem Swagger/OpenAPI thay vì bịa URL.
-5. Đọc log AI/Bedrock và độ trễ; phân biệt lỗi quyền model, timeout, throttling và validation ở ứng dụng.
-6. Ghi rõ đã cấu hình hay đã kiểm thử production; AI không tự duyệt Quote, đổi giá, giữ tồn hoặc xác thực quyền.
+{{< btbfigure file="aws-bedrock-step-2-request-tpm.webp" caption="Hộp thoại TPM của Nova 2 Lite." step="yes" >}}
 
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** Request test gọi được endpoint AI và trả dữ liệu hợp lệ sau phân quyền; chưa chạy thì ghi pending.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-Tài liệu kế hoạch cũ nói Gemini; cập nhật nhóm mới nói Bedrock. Cần xác minh provider trong backend rồi mới khẳng định đã chuyển hoàn toàn.
-
-## Ảnh minh chứng cần chụp
-
-Model/profile, phạm vi IAM, kết quả test đã che dữ liệu và log.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.6.4-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Dùng tài khoản lab gửi một câu hỏi qua BTB. Ghép timestamp/request ID với log ECS. AccessDenied cần kiểm tra task role và Region đích của profile; ThrottlingException cần kiểm tra đúng RPM/TPM. Bộ ảnh chưa xác nhận endpoint production đã trả kết quả.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html>
+- [Inference profiles and permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-prereq.html)

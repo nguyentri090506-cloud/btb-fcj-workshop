@@ -1,43 +1,31 @@
 ---
-title: "AWS Secrets Manager"
+title: "Lưu cấu hình backend trong Secrets Manager"
+menuTitle: "AWS Secrets Manager"
 weight: 1
 chapter: false
 pre: "<b> 5.6.1. </b> "
 ---
 
-# 5.6.1. AWS Secrets Manager
+1. **Mở Secrets Manager → Store a new secret → Other type of secret.** Trong Key/value, nhập các tên biến đúng với cấu hình Spring Boot và giá trị lấy từ project lab. Ảnh chỉ hiển thị cột key.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã tạo secret cho BE; cần kiểm tra key và cách task nhận secret.
+{{< btbfigure file="aws-secret-manager-step-1.webp" caption="Các key kết nối xuất hiện trong ảnh Secrets Manager." step="yes" >}}
 
-## Mục tiêu và vai trò trong hệ thống
+2. **Chọn Next → Configure secret.** Nhập tên `btb-backend` và mô tả cấu hình. Chọn Region cùng ECS.
 
-Lưu cấu hình nhạy cảm của BE: database, AI, webhook, mail.
+{{< btbfigure file="aws-secret-manager-step-2-configure.webp" caption="Tên và mô tả secret." step="yes" >}}
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+3. **Mở Configure rotation.** Với lab nhập credential thủ công, để automatic rotation tắt. Nếu bật, chuẩn bị cơ chế đổi đồng thời credential ở nhà cung cấp. Chọn Next.
 
-1. Mở Secrets Manager → Secrets và tìm secret backend theo tên; không cần xem giá trị bí mật.
-2. Kiểm tra Region, tên/ARN, rotation (nếu có), thời điểm sửa và KMS.
-3. Ở ECS task definition → Container → Secrets, đối chiếu secret key với biến môi trường; nếu app tự fetch runtime thì mô tả luồng đó.
-4. Xác nhận execution role có quyền lấy secret trong task definition; nếu app gọi API Secrets Manager lúc chạy thì kiểm tra task role riêng.
-5. Kiểm tra log BE không lộ secret hoặc connection string; ghi cách redeploy khi đổi credential.
-6. Chỉ chụp tên secret và cấu hình tham chiếu, tuyệt đối không chụp màn hình `Retrieve secret value`.
+{{< btbfigure file="aws-secret-manager-step-3-rotation.webp" caption="Mở Configure rotation." step="yes" >}}
 
-## Kết quả mong đợi và ghi nhận thực tế
+4. **Kiểm tra Review → Store.** So tên secret và encryption key. Sau khi tạo, copy ARN đầy đủ, gồm cả hậu tố AWS sinh.
 
-**Mong đợi:** ECS lấy secret bằng role phù hợp, task mới khởi động được và không lộ credential.
+{{< btbfigure file="aws-secret-manager-step-4-review.webp" caption="Kiểm tra loại secret và encryption key ở màn hình Review." step="yes" >}}
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+5. **Mở ECS → Task definitions → Create new revision → Container → Environment variables.** Chọn ValueFrom cho từng key, dạng `SECRET_ARN:JSON_KEY::`. Cho execution role quyền GetSecretValue. Dùng Linux Fargate 1.4.0 trở lên để lấy từng JSON key.
 
-## Lưu ý vận hành và rủi ro
-
-Đổi secret đã inject qua env thường cần deploy/restart task; không mặc định tự cập nhật runtime.
-
-## Ảnh minh chứng cần chụp
-
-Metadata secret và đường dẫn tham chiếu từ ECS (che giá trị).
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.6.1-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Sau khi triển khai task mới, gọi một API đọc catalog. Nếu task dừng ở ResourceInitializationError, kiểm tra ARN, tên JSON key, quyền execution role và egress tới Secrets Manager.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data-secrets.html>
+- [ECS secret injection](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html)

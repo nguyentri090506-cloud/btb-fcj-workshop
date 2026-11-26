@@ -1,43 +1,59 @@
 ---
-title: "AWS Budgets"
+title: "Track cost with AWS Budgets"
+menuTitle: "AWS Budgets"
 weight: 1
 chapter: false
 pre: "<b> 5.4.1. </b> "
 ---
 
-# 5.4.1. AWS Budgets
+Set a monthly budget before starting Fargate or the ALB. Have a lab mailbox ready for alerts.
 
-> **Source status, as reported by the BTB team (18 November 2026):** Budget created; amount, threshold and destination must be verified.
+1. **Find Billing and Cost Management in the AWS Console.**
 
-## Objective and actual role
+{{< btbfigure file="aws-budgets-step-1.webp" caption="Find Billing and Cost Management in the AWS Console." step="yes" >}}
 
-Cost visibility and alert thresholds for BTB production resources.
+2. **Open Budgets → Create budget.**
 
-## Lab: inspect, document and verify the existing production setup
+{{< btbfigure file="aws-budgets-step-2-create-budget.webp" caption="Open Budgets → Create budget." step="yes" >}}
 
-1. Open Billing and Cost Management → Budgets → inspect the existing BTB budget before editing it.
-2. Record budget type (cost), period (monthly), currency, scope, and forecast or actual thresholds.
-3. Check email subscribers and whether each notification is confirmed and reaches the intended team mailbox.
-4. Inspect the latest actual/forecast spend and compare with ECS, ALB, CloudFront, WAF and logging usage.
-5. If a dedicated lab budget is missing, create a cost budget with a clearly documented *example* threshold chosen by the team, not an invented production amount.
-6. Capture screenshots with amounts obscured only if project policy requires; never claim an alert fired without an actual email.
+3. **Choose Customize (advanced) → Cost budget → Next.**
 
-## Expected outcome / result recording
+{{< btbfigure file="aws-budgets-step-3-customization-setup.webp" caption="Select Cost budget to track spend in currency." step="yes" >}}
 
-**Expected:** Budget exists; thresholds and destinations match recorded values; notification is observable when actually triggered.
+4. **Name the budget and set its period.** In Set your budget enter the following.
+   - Budget name — `BTB-Monthly`
+   - Period — Monthly
+   - Renewal — Recurring
+   - Budgeting method — Fixed
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+{{< btbfigure file="aws-budgets-step-4-set-your-budget.webp" caption="Name and monthly renewal settings." step="yes" >}}
 
-## Risks and operational notes
+5. **Set the amount and scope.** The capture uses USD 200 and All AWS services. Use an amount appropriate for your lab, then select Next.
 
-Budgets is not a hard spending cap; production resources keep incurring charges.
+{{< btbfigure file="aws-budgets-step-4-set-your-budget-1.webp" caption="Fixed amount and service scope." step="yes" >}}
 
-## Screenshot evidence to capture
+6. **Add an alert threshold.** Choose Actual cost, Greater than and 75% of budgeted amount. For the pictured budget this is USD 150.
 
-Budget configuration, notification subscriptions, and cost trend.
+{{< btbfigure file="aws-budgets-step-5-set-alerts.webp" caption="Threshold based on actual spend." step="yes" >}}
 
-**Suggested path:** `static/images/5-workshop/5.4.1-01.png` (capture from real Console; do not create a fake screenshot).
+7. **Enter the email recipient.** Use a mailbox you can verify, then choose Next.
 
-## Official reference
+{{< btbfigure file="aws-budgets-step-5-set-alerts-1.webp" caption="Enter the email recipient." step="yes" >}}
 
-<https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>
+8. **Check Attach actions.** Leave actions empty for an email-only alert and choose Next.
+
+{{< btbfigure file="aws-budgets-step-6-review-alert.webp" caption="Check Attach actions." step="yes" >}}
+
+9. **Review Budget details.** Check Cost budget, Monthly and the amount entered.
+
+{{< btbfigure file="aws-budgets-step-7-review.webp" caption="Review Budget details." step="yes" >}}
+
+10. **Review Alert #1 → Create budget.** Open the verification email if AWS requests it.
+
+{{< btbfigure file="aws-budgets-step-7-review-1.webp" caption="Review shows the 75% alert and no automatic budget actions." step="yes" >}}
+
+**Verify.** Reopen the budget and check its Actual 75% threshold and recipient status. Billing data can take time to arrive.
+
+## References
+
+- [AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create.html)

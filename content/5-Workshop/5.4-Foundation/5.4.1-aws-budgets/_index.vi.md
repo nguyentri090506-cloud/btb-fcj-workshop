@@ -1,43 +1,59 @@
 ---
-title: "AWS Budgets"
+title: "Theo dõi chi phí bằng AWS Budgets"
+menuTitle: "AWS Budgets"
 weight: 1
 chapter: false
 pre: "<b> 5.4.1. </b> "
 ---
 
-# 5.4.1. AWS Budgets
+Tạo ngân sách tháng trước khi khởi động Fargate và ALB. Chuẩn bị một hộp thư lab để nhận cảnh báo.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã tạo budget; cần đối chiếu số tiền, ngưỡng và email nhận.
+1. **Tìm Billing and Cost Management trong AWS Console.**
 
-## Mục tiêu và vai trò trong hệ thống
+{{< btbfigure file="aws-budgets-step-1.webp" caption="Tìm Billing and Cost Management trong AWS Console." step="yes" >}}
 
-Giám sát chi phí và cảnh báo ngân sách của hạ tầng BTB production.
+2. **Mở Budgets → Create budget.**
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+{{< btbfigure file="aws-budgets-step-2-create-budget.webp" caption="Mở Budgets → Create budget." step="yes" >}}
 
-1. Vào Billing and Cost Management → Budgets → kiểm tra budget BTB đã tồn tại trước khi chỉnh sửa.
-2. Ghi loại budget (cost), chu kỳ (monthly), tiền tệ, phạm vi và ngưỡng cảnh báo actual/forecast.
-3. Kiểm tra email nhận thông báo, trạng thái xác nhận và khả năng nhận thư của nhóm.
-4. So sánh chi phí thực tế/dự báo với ECS, ALB, CloudFront, WAF và logging.
-5. Nếu lab chưa có budget riêng, tạo cost budget với ngưỡng *ví dụ* được nhóm chốt; không bịa ngân sách production.
-6. Chụp thông tin cần thiết; không khẳng định hệ thống đã gửi cảnh báo nếu chưa có email thực tế.
+3. **Chọn Customize (advanced) → Cost budget → Next.**
 
-## Kết quả mong đợi và ghi nhận thực tế
+{{< btbfigure file="aws-budgets-step-3-customization-setup.webp" caption="Chọn Cost budget để theo dõi chi tiêu bằng tiền." step="yes" >}}
 
-**Mong đợi:** Có budget; ngưỡng và nơi nhận đúng dữ liệu ghi lại; chỉ đánh dấu email thành công khi có minh chứng.
+4. **Đặt tên và chu kỳ.** Dùng các trường trong Set your budget.
+   - Budget name — `BTB-Monthly`
+   - Period — Monthly
+   - Renewal — Recurring
+   - Budgeting method — Fixed
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+{{< btbfigure file="aws-budgets-step-4-set-your-budget.webp" caption="Tên ngân sách và cách gia hạn theo tháng." step="yes" >}}
 
-## Lưu ý vận hành và rủi ro
+5. **Nhập số tiền và chọn phạm vi.** Ảnh dùng 200 USD, All AWS services. Chọn số tiền phù hợp tài khoản lab rồi bấm Next.
 
-Budgets không tự khóa chi tiêu; tài nguyên production vẫn có thể tính phí.
+{{< btbfigure file="aws-budgets-step-4-set-your-budget-1.webp" caption="Số tiền cố định và phạm vi dịch vụ." step="yes" >}}
 
-## Ảnh minh chứng cần chụp
+6. **Chọn Add an alert threshold.** Chọn Actual cost, Greater than và 75% of budgeted amount. Với ngân sách trong ảnh, ngưỡng là 150 USD.
 
-Cấu hình budget, người nhận email và đồ thị chi phí.
+{{< btbfigure file="aws-budgets-step-5-set-alerts.webp" caption="Ngưỡng dựa trên chi phí thực tế." step="yes" >}}
 
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.4.1-01.png` (chụp Console thật; không tự tạo ảnh giả).
+7. **Điền Email recipients.** Dùng hộp thư mà bạn có thể mở để xác minh, rồi chọn Next.
+
+{{< btbfigure file="aws-budgets-step-5-set-alerts-1.webp" caption="Điền Email recipients." step="yes" >}}
+
+8. **Kiểm tra mục Attach actions.** Để trống nếu chỉ cần email cảnh báo; bấm Next.
+
+{{< btbfigure file="aws-budgets-step-6-review-alert.webp" caption="Kiểm tra mục Attach actions." step="yes" >}}
+
+9. **Đối chiếu Budget details.** Kiểm tra Cost budget, Monthly và số tiền đã nhập.
+
+{{< btbfigure file="aws-budgets-step-7-review.webp" caption="Đối chiếu Budget details." step="yes" >}}
+
+10. **Kiểm tra Alert #1 → Create budget.** Mở thư xác minh nếu AWS yêu cầu.
+
+{{< btbfigure file="aws-budgets-step-7-review-1.webp" caption="Bản review hiển thị ngưỡng 75% và không có hành động tự động." step="yes" >}}
+
+**Kiểm tra kết quả.** Mở lại budget, kiểm tra ngưỡng Actual 75% và trạng thái người nhận. Dữ liệu billing có độ trễ.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html>
+- [AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create.html)

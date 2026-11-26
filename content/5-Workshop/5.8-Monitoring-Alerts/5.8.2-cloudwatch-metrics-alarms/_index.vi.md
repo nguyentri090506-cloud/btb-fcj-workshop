@@ -1,43 +1,38 @@
 ---
-title: "CloudWatch Metrics và Alarms"
+title: "Cảnh báo khi ALB trả lỗi 5xx"
+menuTitle: "CloudWatch Metrics và Alarms"
 weight: 2
 chapter: false
 pre: "<b> 5.8.2. </b> "
 ---
 
-# 5.8.2. CloudWatch Metrics và Alarms
+Tạo SNS topic và xác nhận email ở 5.8.3 trước khi gắn action cho alarm.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã cấu hình metric và alarm.
+1. **Mở CloudWatch → Alarms → All alarms → Create alarm → Select metric.** Chọn nguồn CloudWatch metrics.
 
-## Mục tiêu và vai trò trong hệ thống
+{{< btbfigure file="aws-cloudwatch-metrics--alarms-step-1-create-alarm.webp" caption="Mở CloudWatch → Alarms → All alarms → Create alarm → Select metric." step="yes" >}}
 
-Giám sát CPU/RAM ECS, lỗi/độ trễ/target ALB và kích hoạt cảnh báo.
+2. **Chọn ApplicationELB → Per AppELB Metrics.** Tìm đúng LoadBalancer của lab và chọn HTTPCode_ELB_5XX_Count. Dùng HTTPCode_Target_5XX_Count khi cần đo lỗi ứng dụng trả về.
 
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
+{{< btbfigure file="aws-cloudwatch-metrics--alarms-step-2-select-metric.webp" caption="Chọn dimension LoadBalancer thay cho số liệu gộp." step="yes" >}}
 
-1. Mở CloudWatch → Metrics; chọn metric theo Cluster/Service ECS và ALB đang chạy thật.
-2. Kiểm tra CPUUtilization/MemoryUtilization ECS, HTTPCode_Target_5XX_Count, TargetResponseTime, HealthyHostCount ALB nếu được bật.
-3. Vào Alarms → All alarms, ghi tên, metric, period, statistic, số lần đánh giá và threshold từng alarm.
-4. Kiểm tra action publish đúng SNS topic; ghi trạng thái `OK`, `ALARM`, hoặc `INSUFFICIENT_DATA` thực tế.
-5. Nếu nhóm đã test alarm an toàn, đính kèm history/email có timestamp; chưa thử thì không tự đổi threshold production chỉ để chụp ảnh.
-6. Đối chiếu alarm với ECS events/CloudWatch Logs để giải thích nguyên nhân chứ không chỉ chụp biểu đồ.
+3. **Chọn điều kiện alarm → Next.** Ví dụ cho lab ít traffic:
+   - Statistic — Sum; period — 5 minutes
+   - Threshold type — Static; Greater than — nhập 0
+   - Datapoints — 1 of 1; missing data — not breaching
 
-## Kết quả mong đợi và ghi nhận thực tế
+{{< btbfigure file="aws-cloudwatch-metrics--alarms-step-3-setup-metric.webp" caption="Metric, statistic, period và điều kiện của alarm." step="yes" >}}
 
-**Mong đợi:** Alarm, SNS topic và đồ thị metric được đối chiếu với resource đang chạy.
+4. **Trong Configure actions, chọn In alarm → Select an existing SNS topic.** Chọn btb-system-alerts và bấm Next.
 
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
+{{< btbfigure file="aws-cloudwatch-metrics--alarms-step-4-configure.webp" caption="Gắn SNS vào trạng thái In alarm." step="yes" >}}
 
-## Lưu ý vận hành và rủi ro
+5. **Nhập Alarm name → Review → Create alarm.** Dùng `btb-backend-alb-5xx` như ảnh.
 
-Không ghi “alarm thành công” nếu chưa thấy chuyển trạng thái và email thực tế.
+{{< btbfigure file="aws-cloudwatch-metrics--alarms-step-5-name.webp" caption="Tên alarm của backend ALB." step="yes" >}}
 
-## Ảnh minh chứng cần chụp
-
-Đồ thị metric, cấu hình/trạng thái/history alarm, SNS topic.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.8.2-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Mở alarm → History. Khi có chuyển trạng thái thật, ghép timestamp action với thư SNS. Publish test ở SNS chỉ kiểm tra được đoạn SNS → email.
 
 ## Tài liệu tham khảo
 
-<https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html>
+- [ALB metrics](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html)

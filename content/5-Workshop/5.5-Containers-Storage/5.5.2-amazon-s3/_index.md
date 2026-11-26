@@ -1,50 +1,40 @@
 ---
-title: "Amazon S3"
+title: "Store the React build in S3"
+menuTitle: "Amazon S3"
 weight: 2
 chapter: false
 pre: "<b> 5.5.2. </b> "
 ---
 
-# 5.5.2. Amazon S3
+1. **Search for Amazon S3 → open Buckets.**
 
-> **Source status, as reported by the BTB team (18 November 2026):** Production frontend files stored.
+{{< btbfigure file="aws-s3-step-1.webp" caption="Search for Amazon S3 → open Buckets." step="yes" >}}
 
-## Objective and actual role
+2. **Choose Create bucket → General purpose.**
 
-Stores static compiled frontend files; product and avatar media use Cloudinary instead.
+{{< btbfigure file="aws-s3-step-2-create-bucket.webp" caption="Choose Create bucket → General purpose." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Enter the bucket name and AWS Region.** Choose a valid unique name. Record it for the frontend upload and CloudFront origin.
 
-1. Open S3 → Buckets and identify the bucket containing the deployed React `dist/` or build artifacts.
-2. Check object keys, `index.html`, JS/CSS assets, cache-control metadata, bucket Region, public-access settings and bucket policy.
-3. Inspect the CloudFront origin; if the bucket is private, verify Origin Access Control (OAC) and matching bucket policy.
-4. Confirm the frontend pipeline syncs the intended local build directory and does not remove unrelated objects without review.
-5. When deploying a new SPA version, invalidate the appropriate CloudFront paths and check the page loads refreshed asset hashes.
-6. Do not use this bucket as the default storage for Cloudinary-managed product images and avatars.
+{{< btbfigure file="aws-s3-step-3-general-configuration.webp" caption="Frontend bucket general configuration." step="yes" >}}
 
-## Expected outcome / result recording
+4. **Select Bucket owner enforced.** Keep Block all public access enabled, choose default encryption and create the bucket. CloudFront will read through OAC in 5.7.2.
 
-**Expected:** CloudFront loads built assets, S3 direct public access is disabled if OAC is used, and SPA refresh works for configured routes.
+{{< btbfigure file="aws-s3-step-4-setup-ownership.webp" caption="Object Ownership and Block Public Access." step="yes" >}}
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+5. **Build and upload the storefront.** Set the lab API base URL in the frontend repo. Replace BUCKET_NAME and BUCKET_REGION before running the commands.
 
-## Risks and operational notes
-
-If the team deliberately uses another S3 origin policy, describe what is actually configured instead of silently claiming OAC.
-
-## Screenshot evidence to capture
-
-Bucket objects/permissions, CloudFront origin and browser successful load.
-
-**Suggested path:** `static/images/5-workshop/5.5.2-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Optional read-only command
 
 ```powershell
-# Local sanity check of build folder (choose dist or build as your project uses)
-Get-ChildItem .\dist -ErrorAction SilentlyContinue
+npm ci
+npm run build
+Get-ChildItem dist
+aws s3 sync dist/ s3://BUCKET_NAME/ --region BUCKET_REGION
 ```
 
-## Official reference
 
-<https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html>
+**Verify.** In Objects verify index.html and assets/ are at the root. Once CloudFront is connected, open a JS asset and check its Content-Type.
+
+## References
+
+- [S3 with CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)

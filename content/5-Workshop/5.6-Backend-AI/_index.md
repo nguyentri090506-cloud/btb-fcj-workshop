@@ -1,13 +1,14 @@
 ---
 title: "Backend & AI Deployment"
+menuTitle: "Backend & AI Deployment"
 weight: 6
 chapter: false
 pre: "<b> 5.6. </b> "
 ---
 
-# 5.6. Backend & AI Deployment
 
-This phase documents the actual reported BTB resources. Read each service lab; fill out outcomes and screenshots from the real environment.
+
+Prepare the secret, log group in 5.8.1 and ALB certificate in 5.7.1. Verify a stable task and a Healthy target.
 
 - [5.6.1. AWS Secrets Manager](5.6.1-aws-secrets-manager/) — Protects backend connection parameters, AI configuration, webhook credentials and mail secrets.
 - [5.6.2. Application Load Balancer](5.6.2-application-load-balancer/) — HTTPS API entry point forwarding requests to healthy ECS targets.

@@ -1,43 +1,31 @@
 ---
-title: "Amazon SNS"
+title: "Deliver operations alerts through SNS"
+menuTitle: "Amazon SNS"
 weight: 3
 chapter: false
 pre: "<b> 5.8.3. </b> "
 ---
 
-# 5.8.3. Amazon SNS
+1. **Find Simple Notification Service → open Topics.**
 
-> **Source status, as reported by the BTB team (18 November 2026):** Email subscription configured.
+{{< btbfigure file="aws-sns-step-1.webp" caption="Find Simple Notification Service → open Topics." step="yes" >}}
 
-## Objective and actual role
+2. **Choose Create topic → Standard.** Name it `btb-system-alerts` in the alarm Region and create the topic.
 
-Sends alarm notifications to verified email subscriptions.
+{{< btbfigure file="aws-sns-step-2-create-topic.webp" caption="Select a Standard topic for alert emails." step="yes" >}}
 
-## Lab: inspect, document and verify the existing production setup
+3. **Open the topic → Create subscription.** Set Protocol to Email and Endpoint to your lab mailbox. Create the subscription. Its initial status can be Pending confirmation.
 
-1. Open SNS → Topics; find the topic connected to the production CloudWatch alarm and record the topic ARN without credentials.
-2. Open Subscriptions and verify `Protocol = Email`, the intended endpoint, and `Confirmed` status rather than PendingConfirmation.
-3. Inspect the CloudWatch alarm action; confirm it publishes to this SNS topic, not another test topic.
-4. Check mailbox and spam folder for a real historical alarm message or a controlled team-approved test event.
-5. Document delivery timestamp, alert subject and recipient role with email addresses redacted as appropriate.
-6. Explain SNS messages for infrastructure alerts are separate from BTB customer OTP emails handled by Gmail SMTP.
+{{< btbfigure file="aws-sns-step-3-create-subscription.webp" caption="Open the topic → Create subscription." step="yes" >}}
 
-## Expected outcome / result recording
+4. **Open the AWS Notification email → Confirm subscription.** Return to Subscriptions and check for a confirmed subscription ID.
 
-**Expected:** Confirmed subscription exists, alarm action points to topic and observed alert email is documented if available.
+{{< btbfigure file="aws-sns-step-4-confirm.webp" caption="Invitation to confirm the subscription." step="yes" >}}
 
-**Actual:** `[FILL AFTER TEST: result, date/time, Region, resource, evidence]`
+5. **Open the topic → Publish message.** Enter subject BTB lab and a test message. Check the topic ARN, recipient and email arrival time.
 
-## Risks and operational notes
+**Verify.** The lab mailbox receives the test message. If it is missing check Pending confirmation, spam and Region.
 
-SNS subscriptions alone do not guarantee an alarm fired.
+## References
 
-## Screenshot evidence to capture
-
-SNS topic/subscription (redacted) and actual alert email if available.
-
-**Suggested path:** `static/images/5-workshop/5.8.3-01.png` (capture from real Console; do not create a fake screenshot).
-
-## Official reference
-
-<https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html>
+- [SNS email subscriptions](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html)

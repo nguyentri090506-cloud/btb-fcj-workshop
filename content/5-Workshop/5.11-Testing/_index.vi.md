@@ -1,50 +1,41 @@
 ---
 title: "Kiểm thử và trình diễn"
+menuTitle: "Kiểm thử và trình diễn"
 weight: 11
 chapter: false
 pre: "<b> 5.11. </b> "
 ---
 
-# 5.11. Kiểm thử End-to-End và Live Demo
 
-**Đây là kế hoạch test có thể lặp lại, không phải xác nhận tất cả đã pass.** Dùng tài khoản/đơn thử, API GET an toàn và ảnh đã che dữ liệu. Thay TODO bằng kết quả, timestamp, môi trường, minh chứng thật.
 
-| ID | Ca kiểm thử | Mong đợi | Minh chứng thực tế |
-|---|---|---|---|
-| T01 | Mở frontend HTTPS | React tải qua CloudFront | TODO |
-| T02 | Refresh route con React | SPA routing đúng | TODO |
-| T03 | API HTTPS | ALB phản hồi, ECS target healthy | TODO |
-| T04 | Guest xem catalog/giá | Đúng policy public | TODO |
-| T05 | Admin duyệt + Gmail OTP | Customer hợp lệ mới login được | TODO |
-| T06 | Customer thử gọi API duyệt Quote của Staff | Backend từ chối | TODO |
-| T07 | Volume Pricing và duyệt Quote | Backend tính giá/kiểm quyền đúng | TODO |
-| T08 | Đặt Order khi thiếu SKU | Không Order, không giữ tồn một phần | TODO |
-| T09 | Webhook SePay thử hợp lệ | Xử lý đúng 1 lần | TODO |
-| T10 | Webhook SePay sai/trùng | Không đổi paid sai hoặc double process | TODO |
-| T11 | Delivery Staff hoàn tất chuyến | Đúng điều kiện nghiệp vụ | TODO |
-| T12 | Endpoint AI BE → Bedrock | Đúng schema/permission sau test, hiện pending | TODO |
-| T13 | WAF FE/BE | Đúng association; rule BE **Count** | TODO |
-| T14 | CloudWatch Logs/Alarms → SNS | Log và mail alarm nếu thực sự có | TODO |
-| T15 | CloudWatch RUM/Cognito | Có event từ FE thật, hiện pending | TODO |
-| T16 | GitHub Actions FE/BE | SHA/digest/build khớp dịch vụ deploy | TODO |
-| T17 | Cloudinary/Vietmap | Ảnh và bản đồ/địa chỉ dùng được | TODO |
+Thực hiện trên môi trường lab đã kết nối, dùng tài khoản và đơn hàng demo. Với mỗi ca lưu thời điểm, SHA/revision, kết quả quan sát và một minh chứng đã che dữ liệu. Bộ ảnh cấu hình đi kèm chưa xác nhận các ca dưới đây đã chạy trên production.
 
-## Lệnh test an toàn (điền hostname thật)
+## 1. Kiểm tra từ mép hệ thống đến container
+
+Thay hostname và route React bằng route có thật của bản build. Với route cần đăng nhập, HTTP vẫn có thể trả React shell trước khi ứng dụng chuyển trang. Kiểm tra response body/Content-Type để phân biệt API với HTML.
+
 
 ```powershell
-curl.exe -I https://<FRONTEND_DOMAIN>/
-curl.exe -i https://<API_DOMAIN>/<ACTUAL_PUBLIC_API_PATH>
-Resolve-DnsName <FRONTEND_DOMAIN>
-Resolve-DnsName <API_DOMAIN>
+$site = "https://YOUR_LAB_FRONTEND"
+curl.exe -I "$site/"
+curl.exe -i "$site/customer/profile"
+curl.exe -i "$site/api/health"
+curl.exe -i "$site/api/workshop-missing"
 ```
 
-Không stress test phá hoại, không dùng chuyển khoản thật/địa chỉ thật. Không mặc định `/actuator/health` public; phải xem Swagger/OpenAPI.
 
-## Live demo
+1. **Trang chủ và deep link:** mong đợi HTTPS hợp lệ, JS/CSS tải được, refresh route con vẫn hiển thị đúng hoặc điều hướng login theo quyền. API health trả 200 theo target group. API không tồn tại trả lỗi theo contract, không nhận HTML trang chủ.
 
-- Frontend URL: `[TODO]`
-- API domain (không kèm credential): `[TODO]`
-- Link GitHub Actions FE/BE: `[TODO]`
-- Ngày test và commit/image digest: `[TODO]`
-- Ảnh/video minh chứng: `[TODO]`
-- Chức năng còn pending: `Bedrock production API, RUM ingestion; WAF BE Count` (chỉ sửa khi có test thật).
+2. **Phân quyền và mua hàng:** Guest xem catalog; tài khoản Customer và Staff demo đi qua luồng duyệt báo giá. Kiểm tra giá theo số lượng, tình huống thiếu một SKU, stock và trạng thái đơn trước/sau. Với route duyệt của Staff, yêu cầu từ Customer phải bị backend từ chối.
+
+3. **Nhà cung cấp ngoài:** dùng sản phẩm có ảnh Cloudinary, địa chỉ Vietmap và hộp thư OTP test. Đối chiếu transaction mẫu SePay với đúng đơn và kiểm tra replay ở 5.9.4. Ghi trạng thái chuyến sau thao tác xác nhận giao.
+
+## 2. Kiểm tra phần còn thiếu bằng chứng runtime
+
+**AI:** gửi prompt từ BTB và đối chiếu log task cùng timestamp với model/profile thực tế. **RUM:** mở FE rồi đối chiếu dataplane request và event/page view trong monitor. **Queue:** gửi sự kiện order.workshop ở 5.8.6, kiểm tra SQS body `eventId=lab-001`; nếu có consumer thật, so kết quả với một bản ghi thông báo.
+
+**WAF:** lưu rule action và associated resource theo scope tại thời điểm test. **Alarm:** ghép alarm history và email SNS cùng lần chuyển trạng thái. **CI/CD:** ghép run ID với task revision và asset frontend ở 5.10.
+
+## 3. Ghi kết quả demo
+
+Một dòng minh chứng nên có ca test, thời điểm có múi giờ, hostname lab, kết quả mong đợi, kết quả quan sát, liên kết ảnh/log đã che dữ liệu và trạng thái đạt/lỗi. Với test chưa chạy, ghi rõ điều kiện còn thiếu, ví dụ quyền InvokeModel hoặc chưa có phiên gửi RUM.

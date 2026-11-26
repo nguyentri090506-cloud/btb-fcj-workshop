@@ -1,43 +1,19 @@
 ---
-title: "Vietmap bản đồ và vị trí"
+title: "Kiểm tra tìm địa chỉ và tọa độ với Vietmap"
+menuTitle: "Vietmap bản đồ và vị trí"
 weight: 3
 chapter: false
 pre: "<b> 5.9.3. </b> "
 ---
 
-# 5.9.3. Vietmap bản đồ và vị trí
+1. **Chọn hai địa điểm công cộng làm kho và điểm giao demo.** Trong project Vietmap lab kiểm tra quyền API tìm địa chỉ/định tuyến. Đặt server key trong secret backend; với SDK ở FE dùng client key có hạn chế domain phù hợp.
 
-> **Hiện trạng theo nhóm BTB cung cấp (18/11/2026):** Đã liệt kê tích hợp; cần kiểm tra endpoint/key đang dùng production.
+2. **Mở BTB → màn địa chỉ giao hàng.** Nhập địa điểm thứ nhất, chọn một gợi ý, đối chiếu phường/tỉnh, tọa độ và marker.
 
-## Mục tiêu và vai trò trong hệ thống
+3. **Chọn địa điểm thứ hai và lưu.** Nếu màn hình hỗ trợ route, ghi khoảng cách cùng đơn vị và nguồn ETA. Thử một chuỗi không có kết quả rồi chỉnh lại địa chỉ.
 
-Bản đồ, địa chỉ và khoảng cách giao hàng của BTB.
-
-## Thực hành: đối chiếu, ghi nhận và kiểm tra cấu hình production đang có
-
-1. Mở màn Customer/Delivery Staff production có Vietmap, xác nhận tile/marker tải qua HTTPS.
-2. Kiểm tra API key và origin/restriction theo cấu hình thật, che key trên screenshot.
-3. Test điểm giao mẫu, xem tìm địa chỉ/geocoding và kết quả tuyến/quãng đường hiển thị.
-4. Ghi nghiệp vụ demo BTB: một kho, Order có nhiều package/địa điểm, ETA minh họa theo 40 km/h chứ không cam kết thời gian đường thực.
-5. Test xử lý timeout, quota, denied từ Vietmap và cách hiển thị fallback.
-6. Chụp bản đồ dùng địa chỉ thử, không hiển thị địa chỉ thật của Customer.
-
-## Kết quả mong đợi và ghi nhận thực tế
-
-**Mong đợi:** Bản đồ, địa chỉ và khoảng cách hoạt động với dữ liệu thử theo giả định demo.
-
-**Thực tế:** `[BỔ SUNG SAU KHI TEST: kết quả, ngày/giờ, Region, resource, minh chứng]`
-
-## Lưu ý vận hành và rủi ro
-
-ETA chỉ minh họa; không có GPS/đèn đỏ/kẹt xe thực và không đảm bảo đúng thời gian.
-
-## Ảnh minh chứng cần chụp
-
-Ảnh route và vị trí thử, che thông tin địa chỉ riêng.
-
-**Đường dẫn gợi ý:** `static/images/5-workshop/5.9.3-01.png` (chụp Console thật; không tự tạo ảnh giả).
+**Kiểm tra kết quả.** Vị trí marker đúng với địa điểm đã chọn. Khi marker sai, kiểm tra thứ tự longitude/latitude theo API. Với 403 kiểm tra quyền/key restriction; với 429 kiểm tra quota.
 
 ## Tài liệu tham khảo
 
-<https://maps.vietmap.vn/>
+- [Vietmap Maps API](https://maps.vietmap.vn/docs/)
