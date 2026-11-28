@@ -41,7 +41,3 @@ pre: "<b> 5.6.3. </b> "
    - Load balancing — ALB lab, btb-backend:8080 và target group IP; đặt grace period đủ cho Spring khởi động
 
 **Kiểm tra kết quả.** Đợi Running = Desired, kiểm tra target Healthy rồi gọi GET /api/health qua HTTPS. Nếu rollout lỗi, xem ECS Events và stopped reason của task mới.
-
-## Tài liệu tham khảo
-
-- [ECS with ALB](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/alb.html)

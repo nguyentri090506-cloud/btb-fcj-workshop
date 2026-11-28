@@ -26,9 +26,3 @@ aws logs tail /ecs/btb-backend --since 10m --region ap-southeast-1
 
 
 **Verify.** Check for Spring startup logs in the ECS group and flow records for matching traffic in the VPC group. To find ALB HTTP status inspect the S3 access logs from 5.6.2.
-
-## References
-
-- [ECS awslogs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html)
-
-- [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html)

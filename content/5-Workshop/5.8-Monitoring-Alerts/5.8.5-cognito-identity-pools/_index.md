@@ -31,7 +31,3 @@ pre: "<b> 5.8.5. </b> "
 
 
 **Verify.** Place the pool ID in the client from 5.8.4, open a new browser session and verify PutRumEvents succeeds. This guest role is for browser telemetry.
-
-## References
-
-- [Cognito identity pool roles](https://docs.aws.amazon.com/cognito/latest/developerguide/iam-roles.html)

@@ -27,7 +27,3 @@ pre: "<b> 5.7.1. </b> "
 {{< btbfigure file="aws-certificate-manager-step-3-issued-singapore.webp" caption="Singapore certificate in Issued state." step="yes" >}}
 
 **Verify.** For Pending validation check domain delegation and the DNS CNAME. If an issued certificate is missing from a selector, check Region and account.
-
-## References
-
-- [CloudFront certificate requirements](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html)

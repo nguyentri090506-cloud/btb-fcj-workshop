@@ -31,7 +31,3 @@ Use a lab account for resource creation. The captured names help identify each s
 - [5.11. Testing & Live Demo](5.11-testing/)
 - [5.12. Cost Estimation](5.12-cost/)
 - [5.13. Cleanup & Troubleshooting](5.13-cleanup/)
-
-## Workshop references
-
-[FCAJ · Workshop requirements](https://hcm-rules.awsfcaj.com/3-project/) · [FCAJ · Scoring](https://hcm-rules.awsfcaj.com/5-scoring/) · [AWS-FCJ · Quân, S3 policy lab](https://quanntm1206.github.io/AWS-FCJ/5-workshop/5.3-foundation-setup/5.3.2-set-up-s3-buckets-policies/)

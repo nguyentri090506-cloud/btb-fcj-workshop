@@ -121,9 +121,3 @@ In **task role → Permissions**, add the permissions required by the enabled fe
 </details>
 
 **Verify.** In ECS → running task → Task definition, check Task role and Task execution role. The ECS capture names the execution role ecsTaskExecutionRole. Select the role configured in your lab account.
-
-## References
-
-- [ECS task IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
-
-- [ECS task execution role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)

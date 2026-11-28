@@ -31,7 +31,3 @@ aws elbv2 describe-target-health --target-group-arn LAB_TARGET_GROUP_ARN --regio
 
 
 Lưu cùng một lần deploy: URL Actions run, commit SHA, image digest, revision và thời gian target healthy. Chưa có Actions run trong bộ ảnh này.
-
-## Tài liệu tham khảo
-
-- [GitHub OIDC in AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)

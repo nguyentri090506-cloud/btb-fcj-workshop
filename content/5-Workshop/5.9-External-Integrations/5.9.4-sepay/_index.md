@@ -15,7 +15,3 @@ pre: "<b> 5.9.4. </b> "
 4. **Inspect the webhook result.** Record event ID, status and time. Check the corresponding order after a valid callback. Replay the same demo event and inspect the payment record count.
 
 **Verify.** A valid transaction is applied once. For 403 compare WAF sampled requests and Spring logs at the same time to locate the rejection.
-
-## References
-
-- [SePay documentation](https://docs.sepay.vn/)

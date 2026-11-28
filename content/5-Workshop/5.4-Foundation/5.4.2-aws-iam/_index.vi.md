@@ -121,9 +121,3 @@ Trong **task role → Permissions**, chỉ thêm quyền mà tính năng thực 
 </details>
 
 **Kiểm tra kết quả.** Trong ECS → task đang chạy → Task definition, kiểm tra Task role và Task execution role. Ảnh ECS dùng execution role tên ecsTaskExecutionRole; chọn role đã cấp quyền trong tài khoản lab.
-
-## Tài liệu tham khảo
-
-- [ECS task IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
-
-- [ECS task execution role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)

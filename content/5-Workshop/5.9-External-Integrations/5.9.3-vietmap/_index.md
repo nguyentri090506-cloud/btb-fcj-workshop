@@ -13,7 +13,3 @@ pre: "<b> 5.9.3. </b> "
 3. **Select and save the second place.** If the UI supports routing record distance, unit and ETA source. Try an unmatched input and edit the address again.
 
 **Verify.** The marker matches the selected location. For a misplaced marker check longitude/latitude order against the API. For 403 check access/key restrictions; for 429 check quota.
-
-## References
-
-- [Vietmap Maps API](https://maps.vietmap.vn/docs/)

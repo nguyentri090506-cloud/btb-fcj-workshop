@@ -25,7 +25,3 @@ pre: "<b> 5.6.1. </b> "
 5. **Mở ECS → Task definitions → Create new revision → Container → Environment variables.** Chọn ValueFrom cho từng key, dạng `SECRET_ARN:JSON_KEY::`. Cho execution role quyền GetSecretValue. Dùng Linux Fargate 1.4.0 trở lên để lấy từng JSON key.
 
 **Kiểm tra kết quả.** Sau khi triển khai task mới, gọi một API đọc catalog. Nếu task dừng ở ResourceInitializationError, kiểm tra ARN, tên JSON key, quyền execution role và egress tới Secrets Manager.
-
-## Tài liệu tham khảo
-
-- [ECS secret injection](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html)

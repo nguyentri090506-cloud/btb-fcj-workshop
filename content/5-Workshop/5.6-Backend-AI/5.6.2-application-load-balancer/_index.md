@@ -57,9 +57,3 @@ pre: "<b> 5.6.2. </b> "
 {{< btbfigure file="aws-application-load-balancer-step-6-edit-attributes-1.webp" caption="ALB attributes including deletion protection and access logs." step="yes" >}}
 
 **Verify.** After the ECS lab open Targets → Health details. For timeouts inspect SGs and ports. For ResponseCodeMismatch check path and status. Compare Java logs in CloudWatch against ALB and target status in the access log.
-
-## References
-
-- [ALB health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html)
-
-- [ALB access logs](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html)

@@ -24,7 +24,3 @@ select 1 as connection_ok;
 4. **Mở catalog BTB → tìm một SKU demo đã biết.** Đối chiếu dữ liệu trả về với project lab. Nếu có lỗi kết nối, kiểm tra username của pooler, JDBC URL, task revision và khả năng egress.
 
 **Kiểm tra kết quả.** SQL Editor xác nhận phía DB. Truy vấn catalog từ backend kiểm tra được kết nối thực từ ECS. Xác định Auth/JWT theo cấu hình Spring Security của phiên bản đang chạy.
-
-## Tài liệu tham khảo
-
-- [Supabase connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)

@@ -34,7 +34,3 @@ aws s3 sync dist/ s3://BUCKET_NAME/ --region BUCKET_REGION
 
 
 **Kiểm tra kết quả.** Trong Objects, kiểm tra index.html và assets/ cùng nằm ở root. Sau khi nối CloudFront, mở một asset JS và kiểm tra Content-Type.
-
-## Tài liệu tham khảo
-
-- [S3 with CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)

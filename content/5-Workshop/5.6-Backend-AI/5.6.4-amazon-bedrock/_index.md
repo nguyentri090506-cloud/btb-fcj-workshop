@@ -19,7 +19,3 @@ pre: "<b> 5.6.4. </b> "
 {{< btbfigure file="aws-bedrock-step-2-request-tpm.webp" caption="Nova 2 Lite TPM request dialog." step="yes" >}}
 
 **Verify.** Send a question through BTB using a lab account. Match the timestamp/request ID with ECS logs. For AccessDenied check task-role permissions and profile destination Regions; for ThrottlingException check the correct RPM/TPM. Production endpoint response is still unverified.
-
-## References
-
-- [Inference profiles and permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-prereq.html)

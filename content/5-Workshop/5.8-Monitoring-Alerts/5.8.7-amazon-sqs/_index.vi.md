@@ -25,9 +25,3 @@ aws sqs receive-message --region $region --queue-url $queueUrl --wait-time-secon
 
 
 **Kiểm tra kết quả.** Kết quả mong đợi là lab-001 trong body. Message đã nhận nhưng chưa xóa có thể xuất hiện lại khi hết visibility timeout. Nếu consumer xử lý lỗi nhiều lần, dùng redrive policy và maxReceiveCount của queue chính để chuyển sang **consumer DLQ** riêng.
-
-## Tài liệu tham khảo
-
-- [SQS dead-letter queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html)
-
-- [EventBridge delivery failures](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-dlq.html)

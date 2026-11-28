@@ -26,9 +26,3 @@ aws logs tail /ecs/btb-backend --since 10m --region ap-southeast-1
 
 
 **Kiểm tra kết quả.** Group ECS có log khởi động Spring. Group VPC có flow records khi traffic phù hợp đi qua. Để tìm mã HTTP của ALB, mở access logs trong S3 theo 5.6.2.
-
-## Tài liệu tham khảo
-
-- [ECS awslogs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html)
-
-- [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html)

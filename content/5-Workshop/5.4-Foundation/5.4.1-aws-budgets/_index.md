@@ -53,7 +53,3 @@ Set a monthly budget before starting Fargate or the ALB. Have a lab mailbox read
 {{< btbfigure file="aws-budgets-step-7-review-1.webp" caption="Review shows the 75% alert and no automatic budget actions." step="yes" >}}
 
 **Verify.** Reopen the budget and check its Actual 75% threshold and recipient status. Billing data can take time to arrive.
-
-## References
-
-- [AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create.html)

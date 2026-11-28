@@ -17,7 +17,3 @@ pre: "<b> 5.9.5. </b> "
 3. **Deploy fresh tasks and open activation or password reset in BTB.** Use a demo account and a separate recipient mailbox. Record the send time, check inbox/spam and enter the code in the app.
 
 **Verify.** The code works within its validity period and follows the application's single-use rules. For authentication failure check credentials. For timeout check outbound SMTP connectivity. Mask the OTP when capturing evidence.
-
-## References
-
-- [Google app passwords](https://support.google.com/accounts/answer/185833)

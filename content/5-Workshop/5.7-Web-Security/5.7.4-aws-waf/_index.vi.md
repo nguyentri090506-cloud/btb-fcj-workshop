@@ -182,7 +182,3 @@ Chuẩn bị distribution CloudFront, ALB lab và hostname API. Trong bài này 
 {{< btbfigure file="aws-waf-step-3-display-rules-2.webp" caption="Hai action và priority trên ACL backend trong bộ ảnh." step="yes" >}}
 
 **Kiểm tra kết quả.** Gọi một request hợp lệ từ storefront và xem phản hồi. Với webhook, dùng giao dịch demo của bài 5.9.4. Đối chiếu metric, log và sampled requests từng ACL theo timestamp.
-
-## Tài liệu tham khảo
-
-- [AWS WAF rate rules](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-high-level-settings.html)

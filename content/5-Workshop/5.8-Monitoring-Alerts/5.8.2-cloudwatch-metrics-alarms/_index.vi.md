@@ -32,7 +32,3 @@ Tạo SNS topic và xác nhận email ở 5.8.3 trước khi gắn action cho al
 {{< btbfigure file="aws-cloudwatch-metrics--alarms-step-5-name.webp" caption="Tên alarm của backend ALB." step="yes" >}}
 
 **Kiểm tra kết quả.** Mở alarm → History. Khi có chuyển trạng thái thật, ghép timestamp action với thư SNS. Publish test ở SNS chỉ kiểm tra được đoạn SNS → email.
-
-## Tài liệu tham khảo
-
-- [ALB metrics](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html)

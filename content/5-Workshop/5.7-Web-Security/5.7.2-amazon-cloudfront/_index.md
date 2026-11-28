@@ -91,9 +91,3 @@ function handler(event) {
 {{< btbfigure file="aws-cloudfront-step-12-create-behavior.webp" caption="Cache and origin request policies for the API." step="yes" >}}
 
 **Verify.** Wait for Deployed. Refresh a deep link, open a JS asset and fetch /api/health on the frontend hostname. Expect a backend response. If you get HTML inspect /api/*, function association and custom error mappings.
-
-## References
-
-- [CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)
-
-- [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)

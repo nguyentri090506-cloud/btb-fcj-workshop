@@ -53,7 +53,3 @@ Tạo ngân sách tháng trước khi khởi động Fargate và ALB. Chuẩn b�
 {{< btbfigure file="aws-budgets-step-7-review-1.webp" caption="Bản review hiển thị ngưỡng 75% và không có hành động tự động." step="yes" >}}
 
 **Kiểm tra kết quả.** Mở lại budget, kiểm tra ngưỡng Actual 75% và trạng thái người nhận. Dữ liệu billing có độ trễ.
-
-## Tài liệu tham khảo
-
-- [AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create.html)

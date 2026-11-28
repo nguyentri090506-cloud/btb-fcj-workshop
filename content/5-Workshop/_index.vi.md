@@ -31,7 +31,3 @@ Dùng tài khoản lab cho các bước tạo tài nguyên. Tên trong ảnh gi�
 - [5.11. Kiểm thử và trình diễn](5.11-testing/)
 - [5.12. Dự toán chi phí](5.12-cost/)
 - [5.13. Dọn tài nguyên và khắc phục lỗi](5.13-cleanup/)
-
-## Nguồn đối chiếu
-
-[FCAJ · Workshop requirements](https://hcm-rules.awsfcaj.com/3-project/) · [FCAJ · Scoring](https://hcm-rules.awsfcaj.com/5-scoring/) · [AWS-FCJ · Quân, S3 policy lab](https://quanntm1206.github.io/AWS-FCJ/5-workshop/5.3-foundation-setup/5.3.2-set-up-s3-buckets-policies/)

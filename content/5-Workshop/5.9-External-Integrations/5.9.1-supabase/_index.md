@@ -24,7 +24,3 @@ select 1 as connection_ok;
 4. **Open the BTB catalog and find a known demo SKU.** Compare it with the lab project data. For a connection failure check the pooler username, JDBC URL, task revision and egress.
 
 **Verify.** SQL Editor verifies the database side. The backend catalog request verifies the connection from ECS. Determine Auth/JWT behavior from the deployed Spring Security configuration.
-
-## References
-
-- [Supabase connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)

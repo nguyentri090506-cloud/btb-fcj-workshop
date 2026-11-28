@@ -13,7 +13,3 @@ pre: "<b> 5.9.3. </b> "
 3. **Chọn địa điểm thứ hai và lưu.** Nếu màn hình hỗ trợ route, ghi khoảng cách cùng đơn vị và nguồn ETA. Thử một chuỗi không có kết quả rồi chỉnh lại địa chỉ.
 
 **Kiểm tra kết quả.** Vị trí marker đúng với địa điểm đã chọn. Khi marker sai, kiểm tra thứ tự longitude/latitude theo API. Với 403 kiểm tra quyền/key restriction; với 429 kiểm tra quota.
-
-## Tài liệu tham khảo
-
-- [Vietmap Maps API](https://maps.vietmap.vn/docs/)

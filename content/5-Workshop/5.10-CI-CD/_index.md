@@ -31,7 +31,3 @@ aws elbv2 describe-target-health --target-group-arn LAB_TARGET_GROUP_ARN --regio
 
 
 For one deployment record the Actions run URL, commit SHA, digest, revision and target health time. The supplied captures do not include an Actions run.
-
-## References
-
-- [GitHub OIDC in AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)

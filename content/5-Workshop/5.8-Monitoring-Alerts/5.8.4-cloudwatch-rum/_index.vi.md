@@ -42,7 +42,3 @@ try {
 3. **Build lại frontend → upload S3 → làm mới cache CloudFront.** Mở website trong tab mới trên hostname đã khai báo. Ảnh dùng sampling 100% và cookie; áp dụng cơ chế đồng ý của website khi sử dụng thực tế.
 
 **Kiểm tra kết quả.** DevTools → Network: lọc dataplane.rum và xem status. Trong RUM → monitor, chọn time range của lần test và tìm page view. Với 403 kiểm tra guest role và signing. Note nhóm ghi đã thêm code, còn ingestion production cần test.
-
-## Tài liệu tham khảo
-
-- [CloudWatch RUM setup](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html)

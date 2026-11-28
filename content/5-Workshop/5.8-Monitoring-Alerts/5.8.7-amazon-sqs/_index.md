@@ -25,9 +25,3 @@ aws sqs receive-message --region $region --queue-url $queueUrl --wait-time-secon
 
 
 **Verify.** Expect lab-001 in the body. A received but undeleted message can reappear after the visibility timeout. For repeated consumer failures use the source queue's redrive policy and maxReceiveCount with a separate **consumer DLQ**.
-
-## References
-
-- [SQS dead-letter queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html)
-
-- [EventBridge delivery failures](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-dlq.html)

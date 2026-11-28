@@ -25,7 +25,3 @@ pre: "<b> 5.8.3. </b> "
 5. **Mở topic → Publish message.** Nhập subject BTB lab và nội dung thử; đối chiếu topic ARN, người nhận và thời gian email đến.
 
 **Kiểm tra kết quả.** Hộp thư lab nhận đúng nội dung. Nếu chưa tới, kiểm tra Pending confirmation, spam và Region.
-
-## Tài liệu tham khảo
-
-- [SNS email subscriptions](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html)

@@ -19,7 +19,3 @@ pre: "<b> 5.6.4. </b> "
 {{< btbfigure file="aws-bedrock-step-2-request-tpm.webp" caption="Hộp thoại TPM của Nova 2 Lite." step="yes" >}}
 
 **Kiểm tra kết quả.** Dùng tài khoản lab gửi một câu hỏi qua BTB. Ghép timestamp/request ID với log ECS. AccessDenied cần kiểm tra task role và Region đích của profile; ThrottlingException cần kiểm tra đúng RPM/TPM. Bộ ảnh chưa xác nhận endpoint production đã trả kết quả.
-
-## Tài liệu tham khảo
-
-- [Inference profiles and permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-prereq.html)

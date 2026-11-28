@@ -30,7 +30,3 @@ curl.exe -i "https://$domain/api/health"
 
 
 **Verify.** Verify the expected delegation, valid frontend HTTPS and a backend response for /api/health on the frontend hostname.
-
-## References
-
-- [Route 53 delegation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/MigratingDNS.html)

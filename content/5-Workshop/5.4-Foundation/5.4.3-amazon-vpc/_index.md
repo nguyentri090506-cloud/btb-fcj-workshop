@@ -67,7 +67,3 @@ Prepare two Singapore AZs for the ALB and a network path to Fargate tasks on por
 {{< btbfigure file="aws-vpc-step-10-create-security-groups.webp" caption="Security group creation in the VPC." step="yes" >}}
 
 **Verify.** Select each subnet → Route table and verify its routes and association. In the ECS lab the target should become Healthy when the ALB checks port 8080.
-
-## References
-
-- [VPC routing](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)

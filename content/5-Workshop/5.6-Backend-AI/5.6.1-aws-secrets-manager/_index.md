@@ -25,7 +25,3 @@ pre: "<b> 5.6.1. </b> "
 5. **Open ECS → Task definitions → Create new revision → Container → Environment variables.** Choose ValueFrom for each key using `SECRET_ARN:JSON_KEY::`. Grant GetSecretValue to the execution role. Use Linux Fargate 1.4.0 or later for individual JSON keys.
 
 **Verify.** After deploying a new task, read the catalog through the API. For ResourceInitializationError check the ARN, JSON key name, execution role permission and egress to Secrets Manager.
-
-## References
-
-- [ECS secret injection](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html)

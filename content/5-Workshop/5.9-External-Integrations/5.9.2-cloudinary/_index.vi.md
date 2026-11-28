@@ -15,7 +15,3 @@ pre: "<b> 5.9.2. </b> "
 4. **Mở DevTools → Network → Img → refresh.** Chọn request ảnh, đối chiếu hostname Cloudinary, Content-Type và kích thước truyền.
 
 **Kiểm tra kết quả.** Ảnh tải được khi mở lại trang. Nếu URL trả 404, đối chiếu public_id và chữ hoa/thường. Nếu URL đúng nhưng thẻ trống, kiểm tra dữ liệu API và img src. Gỡ liên kết ở SKU trước khi xóa ảnh lab.
-
-## Tài liệu tham khảo
-
-- [Cloudinary Upload API](https://cloudinary.com/documentation/image_upload_api_reference)

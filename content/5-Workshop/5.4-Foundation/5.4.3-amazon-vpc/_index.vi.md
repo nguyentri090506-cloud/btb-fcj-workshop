@@ -67,7 +67,3 @@ Chuẩn bị hai AZ tại Singapore cho ALB và đường mạng từ ALB đến
 {{< btbfigure file="aws-vpc-step-10-create-security-groups.webp" caption="Màn hình tạo security group trong VPC." step="yes" >}}
 
 **Kiểm tra kết quả.** Chọn từng subnet → Route table, kiểm tra route đích và association. Ở bài ECS, target phải thành Healthy khi ALB kiểm tra cổng 8080.
-
-## Tài liệu tham khảo
-
-- [VPC routing](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)

@@ -25,7 +25,3 @@ pre: "<b> 5.8.3. </b> "
 5. **Open the topic → Publish message.** Enter subject BTB lab and a test message. Check the topic ARN, recipient and email arrival time.
 
 **Verify.** The lab mailbox receives the test message. If it is missing check Pending confirmation, spam and Region.
-
-## References
-
-- [SNS email subscriptions](https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html)

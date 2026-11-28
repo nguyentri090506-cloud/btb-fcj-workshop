@@ -64,9 +64,3 @@ First create the two Standard queues btb-customer-events and btb-customer-events
 9. **Send a test event from the lab bus.** Open the bus → Send events. Enter source `bitetobusiness.backend`, detail type `order.workshop` and detail `{"eventId":"lab-001","orderRef":"DEMO-01"}`. Send and inspect the queue body in 5.8.7. Try inventory.updated in the Event pattern sandbox to check a non-match.
 
 **Verify.** SQS receives eventId lab-001 and orderRef DEMO-01. For an empty queue check bus, pattern, target role and FailedInvocations.
-
-## References
-
-- [EventBridge pattern operators](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-pattern-operators.html)
-
-- [EventBridge target DLQ](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-dlq.html)

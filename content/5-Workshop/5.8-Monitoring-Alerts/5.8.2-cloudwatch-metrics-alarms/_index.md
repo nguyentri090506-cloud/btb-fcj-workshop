@@ -32,7 +32,3 @@ Create the SNS topic and confirm the email subscription in 5.8.3 before attachin
 {{< btbfigure file="aws-cloudwatch-metrics--alarms-step-5-name.webp" caption="Backend ALB alarm name." step="yes" >}}
 
 **Verify.** Open the alarm → History. When a transition occurs, compare the action timestamp with its SNS email. Publishing a test in SNS checks the SNS-to-email part of the path.
-
-## References
-
-- [ALB metrics](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html)

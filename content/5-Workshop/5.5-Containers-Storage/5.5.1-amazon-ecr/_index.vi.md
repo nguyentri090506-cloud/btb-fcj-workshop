@@ -33,7 +33,3 @@ aws ecr describe-images --region $region --repository-name generate-ui-be --imag
 
 
 **Kiểm tra kết quả.** Mở Images → chọn tag vừa push. So digest với kết quả describe-images. Ghi lại URI và digest cho task definition.
-
-## Tài liệu tham khảo
-
-- [ECR private image push](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)

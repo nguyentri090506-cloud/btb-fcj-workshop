@@ -91,9 +91,3 @@ function handler(event) {
 {{< btbfigure file="aws-cloudfront-step-12-create-behavior.webp" caption="Cache policy và origin request policy cho API." step="yes" >}}
 
 **Kiểm tra kết quả.** Đợi Deployed. Refresh một route con, mở một file JS, rồi gọi /api/health trên hostname FE. API phải trả response của backend; nếu nhận HTML, kiểm tra behavior /api/*, function association và custom error mapping.
-
-## Tài liệu tham khảo
-
-- [CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)
-
-- [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)

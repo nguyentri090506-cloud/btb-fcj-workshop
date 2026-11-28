@@ -27,7 +27,3 @@ pre: "<b> 5.7.1. </b> "
 {{< btbfigure file="aws-certificate-manager-step-3-issued-singapore.webp" caption="Chứng chỉ Singapore ở trạng thái Issued." step="yes" >}}
 
 **Kiểm tra kết quả.** Nếu Pending validation, kiểm tra nameserver của domain và DNS CNAME. Nếu cert đã Issued nhưng không thấy khi gắn, kiểm tra Region và account.
-
-## Tài liệu tham khảo
-
-- [CloudFront certificate requirements](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html)

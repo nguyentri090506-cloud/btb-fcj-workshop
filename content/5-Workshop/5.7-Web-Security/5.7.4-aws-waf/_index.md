@@ -182,7 +182,3 @@ Prepare the CloudFront distribution, lab ALB and API hostname. CloudFront and th
 {{< btbfigure file="aws-waf-step-3-display-rules-2.webp" caption="The two actions and priorities in the backend ACL capture." step="yes" >}}
 
 **Verify.** Make one valid request from the storefront and inspect its response. For the webhook use the demo transaction in 5.9.4. Match metrics, logs and sampled requests for each ACL by timestamp.
-
-## References
-
-- [AWS WAF rate rules](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based-high-level-settings.html)

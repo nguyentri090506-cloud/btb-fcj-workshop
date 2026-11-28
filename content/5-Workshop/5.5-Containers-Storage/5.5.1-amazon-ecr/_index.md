@@ -33,7 +33,3 @@ aws ecr describe-images --region $region --repository-name generate-ui-be --imag
 
 
 **Verify.** Open Images and select the uploaded tag. Compare its digest with describe-images and record the URI and digest for the task definition.
-
-## References
-
-- [ECR private image push](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)

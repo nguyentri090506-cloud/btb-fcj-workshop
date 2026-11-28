@@ -41,7 +41,3 @@ pre: "<b> 5.6.3. </b> "
    - Load balancing — lab ALB, btb-backend:8080 and IP target group; allow enough startup grace for Spring
 
 **Verify.** Wait for Running to equal Desired, verify a Healthy target and fetch GET /api/health over HTTPS. For a failed rollout inspect ECS Events and the new task's stopped reason.
-
-## References
-
-- [ECS with ALB](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/alb.html)

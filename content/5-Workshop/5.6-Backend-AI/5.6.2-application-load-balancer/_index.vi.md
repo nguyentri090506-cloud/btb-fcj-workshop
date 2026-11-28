@@ -57,9 +57,3 @@ pre: "<b> 5.6.2. </b> "
 {{< btbfigure file="aws-application-load-balancer-step-6-edit-attributes-1.webp" caption="Attributes của ALB, gồm bảo vệ xóa và access logs." step="yes" >}}
 
 **Kiểm tra kết quả.** Sau bài ECS, mở Targets → Health details. Timeout thường liên quan SG/cổng; ResponseCodeMismatch cần đối chiếu path và status. So log Java trong CloudWatch với status ALB/target trong access log.
-
-## Tài liệu tham khảo
-
-- [ALB health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html)
-
-- [ALB access logs](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html)

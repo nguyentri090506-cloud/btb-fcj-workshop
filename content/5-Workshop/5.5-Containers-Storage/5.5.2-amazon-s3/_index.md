@@ -34,7 +34,3 @@ aws s3 sync dist/ s3://BUCKET_NAME/ --region BUCKET_REGION
 
 
 **Verify.** In Objects verify index.html and assets/ are at the root. Once CloudFront is connected, open a JS asset and check its Content-Type.
-
-## References
-
-- [S3 with CloudFront OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)

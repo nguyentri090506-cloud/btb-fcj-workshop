@@ -15,7 +15,3 @@ pre: "<b> 5.9.2. </b> "
 4. **Open DevTools → Network → Img and refresh.** Select the image request and verify the Cloudinary hostname, Content-Type and transfer size.
 
 **Verify.** The image loads after refresh. For a 404 inspect public_id and case. If the URL works but the card is blank check the API response and img src. Remove the SKU reference before deleting the lab asset.
-
-## References
-
-- [Cloudinary Upload API](https://cloudinary.com/documentation/image_upload_api_reference)

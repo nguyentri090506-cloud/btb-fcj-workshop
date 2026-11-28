@@ -17,7 +17,3 @@ pre: "<b> 5.9.5. </b> "
 3. **Deploy task mới và mở luồng kích hoạt hoặc đặt lại mật khẩu trên BTB.** Dùng tài khoản demo và email nhận riêng. Ghi thời điểm gửi, mở Inbox/Spam rồi nhập mã trong ứng dụng.
 
 **Kiểm tra kết quả.** Mã dùng được trong thời hạn và được xử lý theo quy tắc dùng một lần của ứng dụng. Nếu authentication failed, kiểm tra credential. Với timeout, kiểm tra egress tới cổng SMTP. Che OTP khi lưu ảnh demo.
-
-## Tài liệu tham khảo
-
-- [Google app passwords](https://support.google.com/accounts/answer/185833)

@@ -31,7 +31,3 @@ pre: "<b> 5.8.5. </b> "
 
 
 **Kiểm tra kết quả.** Gắn pool ID vào client ở 5.8.4, mở phiên trình duyệt mới và kiểm tra PutRumEvents thành công. Guest role này chỉ cấp quyền gửi telemetry.
-
-## Tài liệu tham khảo
-
-- [Cognito identity pool roles](https://docs.aws.amazon.com/cognito/latest/developerguide/iam-roles.html)

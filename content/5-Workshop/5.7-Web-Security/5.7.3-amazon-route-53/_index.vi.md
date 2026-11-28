@@ -30,7 +30,3 @@ curl.exe -i "https://$domain/api/health"
 
 
 **Kiểm tra kết quả.** NS trả về đúng delegation, trình duyệt mở FE qua HTTPS và /api/health trên hostname FE phản hồi từ backend.
-
-## Tài liệu tham khảo
-
-- [Route 53 delegation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/MigratingDNS.html)

@@ -64,9 +64,3 @@ Tạo trước hai Standard queue btb-customer-events và btb-customer-events-dl
 9. **Gửi sự kiện thử từ bus lab.** Mở event bus → Send events. Điền Source `bitetobusiness.backend`, Detail type `order.workshop`, Detail `{"eventId":"lab-001","orderRef":"DEMO-01"}`. Chọn Send và mở queue ở 5.8.7 để đọc body. Trong Event pattern sandbox, thử inventory.updated để kiểm tra trường hợp không match.
 
 **Kiểm tra kết quả.** SQS nhận eventId lab-001 và orderRef DEMO-01. Nếu queue trống, kiểm tra bus, pattern, target role và FailedInvocations.
-
-## Tài liệu tham khảo
-
-- [EventBridge pattern operators](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-pattern-operators.html)
-
-- [EventBridge target DLQ](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-dlq.html)

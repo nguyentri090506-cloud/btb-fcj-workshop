@@ -42,7 +42,3 @@ try {
 3. **Rebuild the frontend → upload to S3 → refresh the CloudFront cache.** Open a new tab on a configured hostname. The capture uses 100% sampling and cookies. Apply the website's consent requirements in use.
 
 **Verify.** In DevTools → Network filter for dataplane.rum and inspect its status. In RUM → monitor select the test time range and look for a page view. For 403 check guest role and signing. The note reports client integration; production ingestion still needs testing.
-
-## References
-
-- [CloudWatch RUM setup](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-get-started.html)
